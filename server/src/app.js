@@ -20,7 +20,7 @@ app.use(cookieParser()); // to set and access the cookies of the client in the b
 
 // Session middleware setup
 app.use(session({
-    secret: process.env.SESSION_SECRET, // Use a strong secret key
+    secret: 'process.env.SESSION_SECRET', // Use a strong secret key
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false } // Set to true if you're using HTTPS
