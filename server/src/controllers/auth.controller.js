@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import { sendOtp, verifyOtp } from '../services/otp.service.js';
+import { sendOtp, verifyOtp } from '../services/otp.service.js';  // Importing the OTP service
 
 // Helper function to generate Access and Refresh Tokens
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -43,6 +43,10 @@ const registerUser = asyncHandler(async (req, res) => {
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
+    // Send OTP before saving the user
+    await sendOtp(email);
+
+    // Create user with isVerified set to false
     const user = await User.create({
         fullName,
         avatar: avatar.url,
@@ -50,15 +54,48 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         password,
         username: username.toLowerCase(),
+        isVerified: false, // Mark as unverified initially
     });
 
-    const createdUser = await User.findById(user._id).select("-password -refreshToken");
+    return res.status(200).json(new ApiResponse(200, {}, "User created. Please verify your email."));
+});
 
-    if (!createdUser) {
-        throw new ApiError(500, "User creation failed");
+// OTP for Signup (send OTP to email)
+const requestOtpForSignup = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return res.status(400).json({ message: 'Email already registered' });
     }
 
-    return res.status(201).json(new ApiResponse(200, createdUser, "User registered Successfully."));
+    await sendOtp(email);  // Send OTP to email
+    return res.status(200).json({ message: 'OTP sent to your email. Please verify your email.' });
+});
+
+// Verify OTP after Signup
+const verifyOtpForSignup = asyncHandler(async (req, res) => {
+    const { email, otp } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    try {
+        // Verify the OTP using the otp.service
+        await verifyOtp(email, otp);
+
+        // Set user as verified
+        user.isVerified = true;
+        await user.save();
+
+        return res.status(200).json({ message: 'OTP verified successfully. Your account is now verified.' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
 });
 
 // User login
@@ -79,6 +116,11 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid password");
     }
 
+    // Check if the user is verified
+    if (!userExistence.isVerified) {
+        throw new ApiError(401, "Please verify your email before logging in.");
+    }
+
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(userExistence._id);
     const loggedInUser = await User.findById(userExistence._id).select("-password -refreshToken");
 
@@ -96,6 +138,74 @@ const loginUser = asyncHandler(async (req, res) => {
         );
 });
 
+// Request OTP for Forgot Password
+const requestOtpForPasswordReset = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    await sendOtp(email);  // Send OTP to email for password reset
+    return res.status(200).json({ message: 'OTP sent to your email for password reset.' });
+});
+
+// Verify OTP for Forgot Password
+const verifyOtpForPasswordReset = asyncHandler(async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    try {
+        // Verify OTP using otp.service
+        await verifyOtp(email, otp); // Verify OTP
+        user.password = newPassword; // Update password
+        await user.save();
+
+        return res.status(200).json({ message: 'Password reset successfully.' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+});
+
+// Request OTP for Change Email
+const requestOtpForChangeEmail = asyncHandler(async (req, res) => {
+    const { email, newEmail } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    await sendOtp(newEmail); // Send OTP to new email
+    return res.status(200).json({ message: 'OTP sent to the new email for verification.' });
+});
+
+// Verify OTP for Change Email
+const verifyOtpForChangeEmail = asyncHandler(async (req, res) => {
+    const { email, otp, newEmail } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    try {
+        // Verify OTP using otp.service
+        await verifyOtp(email, otp); // Verify OTP
+        user.email = newEmail; // Update email
+        await user.save();
+
+        return res.status(200).json({ message: 'Email changed successfully.' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+});
+
 // Logout the user (clear refreshToken cookie)
 const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: undefined } }, { new: true });
@@ -111,117 +221,14 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "User logged out."));
 });
 
-// Refresh the access token using the refresh token
-const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
-
-    if (!incomingRefreshToken) {
-        throw new ApiError(401, "Unauthorized Request.");
-    }
-
-    try {
-        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
-
-        const user = await User.findById(decodedToken?._id);
-        if (!user) {
-            throw new ApiError(401, "Unauthorized Request.");
-        }
-
-        if (incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError(401, "Refresh token is expired or used.");
-        }
-
-        const options = {
-            httpOnly: true,
-            secure: true,
-        };
-
-        const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
-
-        return res
-            .status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", newRefreshToken, options)
-            .json(
-                new ApiResponse(200, { accessToken, newRefreshToken }, "Access Token Refreshed.")
-            );
-    } catch (error) {
-        throw new ApiError(401, error?.message || "Unauthorized Request.");
-    }
-});
-
-// Request OTP route
-const requestOtp = async (req, res) => {
-    const { email } = req.body;
-    try {
-        await sendOtp(email);
-        return res.status(200).json({ message: 'OTP sent to your email' });
-    } catch (error) {
-        return res.status(400).json({ message: error.message });
-    }
+export { 
+    registerUser, 
+    loginUser, 
+    logoutUser, 
+    requestOtpForSignup, 
+    verifyOtpForSignup, 
+    requestOtpForPasswordReset, 
+    verifyOtpForPasswordReset, 
+    requestOtpForChangeEmail, 
+    verifyOtpForChangeEmail 
 };
-
-// Verify OTP route
-const verifyOtp = async (req, res) => {
-    const { email, otp } = req.body;
-    try {
-        await verifyOtp(email, otp);
-        return res.status(200).json({ message: 'OTP verified successfully' });
-    } catch (error) {
-        return res.status(400).json({ message: error.message });
-    }
-};
-
-// Request OTP for sign-up
-const requestOtpForSignup = async (req, res) => {
-    const { email, username, password } = req.body;
-
-    // Check if the email already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-        return res.status(400).json({ message: 'Email already registered' });
-    }
-
-    // Create a new user record with OTP (without isVerified)
-    const otp = await sendOtp(email); // sendOtp function should return the OTP
-    const otpExpiration = new Date();
-    otpExpiration.setMinutes(otpExpiration.getMinutes() + 10); // Set OTP expiration time
-
-    const newUser = new User({
-        email,
-        username,
-        password,
-        otp,
-        otpExpiration,
-        isVerified: false, // User is not verified yet
-    });
-
-    await newUser.save();
-    return res.status(200).json({ message: 'OTP sent to your email. Please verify your email.' });
-};
-
-// Verify OTP
-const verifyOtpForSignup = async (req, res) => {
-    const { email, otp } = req.body;
-
-    // Find the user by email
-    const user = await User.findOne({ email });
-
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
-
-    try {
-        // Call the `verifyOtp` method on the user instance
-        await user.verifyOtp(otp);
-
-        // Proceed with the rest of the sign-up process after OTP verification
-        // (e.g., hashing the password, saving user, etc.)
-        // Here we assume the password has already been hashed earlier.
-        return res.status(200).json({ message: 'OTP verified successfully. Your account is now verified.' });
-    } catch (error) {
-        return res.status(400).json({ message: error.message });
-    }
-};
-
-export { registerUser, loginUser, logoutUser, refreshAccessToken, requestOtp, verifyOtp, requestOtpForSignup, verifyOtpForSignup };
