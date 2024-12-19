@@ -172,4 +172,56 @@ const verifyOtp = async (req, res) => {
     }
 };
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken, requestOtp, verifyOtp };
+// Request OTP for sign-up
+const requestOtpForSignup = async (req, res) => {
+    const { email, username, password } = req.body;
+
+    // Check if the email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Create a new user record with OTP (without isVerified)
+    const otp = await sendOtp(email); // sendOtp function should return the OTP
+    const otpExpiration = new Date();
+    otpExpiration.setMinutes(otpExpiration.getMinutes() + 10); // Set OTP expiration time
+
+    const newUser = new User({
+        email,
+        username,
+        password,
+        otp,
+        otpExpiration,
+        isVerified: false, // User is not verified yet
+    });
+
+    await newUser.save();
+    return res.status(200).json({ message: 'OTP sent to your email. Please verify your email.' });
+};
+
+// Verify OTP
+const verifyOtpForSignup = async (req, res) => {
+    const { email, otp } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    try {
+        // Call the `verifyOtp` method on the user instance
+        await user.verifyOtp(otp);
+
+        // Proceed with the rest of the sign-up process after OTP verification
+        // (e.g., hashing the password, saving user, etc.)
+        // Here we assume the password has already been hashed earlier.
+        return res.status(200).json({ message: 'OTP verified successfully. Your account is now verified.' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, requestOtp, verifyOtp, requestOtpForSignup, verifyOtpForSignup };

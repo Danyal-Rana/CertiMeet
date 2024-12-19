@@ -42,6 +42,9 @@ const userSchema = new Schema({
         type: Date, 
         default: null 
     },
+    isVerified: { 
+        type: Boolean, default: false 
+    },
     refreshToken: {
         type: String,
     },
@@ -106,6 +109,25 @@ userSchema.methods.applyForAdminRole = function (inputSecretKey) {
     } else {
         return false; // Secret key is incorrect
     }
+};
+
+// Method to generate OTP
+userSchema.methods.verifyOtp = async function (otp) {
+    if (this.otp !== otp) {
+        throw new Error('Invalid OTP');
+    }
+
+    const now = new Date();
+    if (now > this.otpExpiration) {
+        throw new Error('OTP expired');
+    }
+
+    // OTP is valid, mark user as verified
+    this.isVerified = true;
+    this.otp = null; // Clear OTP after verification
+    this.otpExpiration = null; // Clear OTP expiration time
+    await this.save(); // Save changes to the database
+    return true;
 };
 
 export const User = mongoose.model("User", userSchema);
