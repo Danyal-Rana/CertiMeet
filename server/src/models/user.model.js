@@ -89,7 +89,7 @@ userSchema.methods.generateRefreshToken = function () {
 
 // Method to apply for admin role (using secret key)
 userSchema.methods.applyForAdminRole = function (inputSecretKey) {
-    const correctSecretKey = process.env.AdminKey; // The correct secret key to become admin
+    const correctSecretKey = process.env.AdminKey;
 
     if (inputSecretKey === correctSecretKey) {
         this.role = 'admin';
