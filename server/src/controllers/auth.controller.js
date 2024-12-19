@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import { sendOtp, verifyOtp } from "../utils/otp.util.js";
+import { sendOtp, verifyOtp } from '../services/otp.service.js';
 
 // Helper function to generate Access and Refresh Tokens
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -150,4 +150,26 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+// Request OTP route
+const requestOtp = async (req, res) => {
+    const { email } = req.body;
+    try {
+        await sendOtp(email);
+        return res.status(200).json({ message: 'OTP sent to your email' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+// Verify OTP route
+const verifyOtp = async (req, res) => {
+    const { email, otp } = req.body;
+    try {
+        await verifyOtp(email, otp);
+        return res.status(200).json({ message: 'OTP verified successfully' });
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, requestOtp, verifyOtp };

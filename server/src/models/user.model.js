@@ -34,6 +34,14 @@ const userSchema = new Schema({
         enum: ["user", "admin"],
         default: "user",
     },
+    otp: { 
+        type: String, 
+        default: null 
+    },
+    otpExpiration: { 
+        type: Date, 
+        default: null 
+    },
     refreshToken: {
         type: String,
     },
