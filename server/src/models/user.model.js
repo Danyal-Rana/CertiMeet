@@ -29,6 +29,11 @@ const userSchema = new Schema({
         type: String,
         required: [true, "Password is required"],
     },
+    role: {
+        type: String,
+        enum: ["user", "admin"],
+        default: "user",
+    },
     refreshToken: {
         type: String,
     },
@@ -88,7 +93,7 @@ userSchema.methods.applyForAdminRole = function (inputSecretKey) {
 
     if (inputSecretKey === correctSecretKey) {
         this.role = 'admin';
-        this.secretKey = null; // Clear the secret key once validated
+        this.secretKey = null;
         return true;
     } else {
         return false; // Secret key is incorrect
