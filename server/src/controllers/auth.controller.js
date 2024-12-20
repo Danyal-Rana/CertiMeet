@@ -97,6 +97,10 @@ const verifyOtpForSignup = asyncHandler(async (req, res) => {
 
         // Set user as verified
         user.isVerified = true;
+        // clearing otp and otpExpiration
+        user.otp = undefined;
+        user.otpExpiration = undefined;
+        
         await user.save();
 
         return res.status(200).json({ message: 'OTP verified successfully. Your account is now verified.' });
