@@ -1,5 +1,6 @@
-import nodemailer from 'nodemailer';
-import { User } from '../models/user.model.js';
+import nodemailer from "nodemailer";
+import { User } from "../models/user.model.js";
+import { otpMailTemplate } from "../utils/mails.js";
 
 // OTP Generation Logic
 const generateOtp = () => {
@@ -18,11 +19,14 @@ const sendOtpEmail = async (email, otp) => {
         },
     });
 
+    const { subject, text, html } = otpMailTemplate(otp);
+
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: 'Your OTP Code',
-        text: `Your OTP code is: ${otp}. It will expire in 10 minutes.`,
+        subject,
+        text,
+        html,
     };
 
     await transporter.sendMail(mailOptions);
@@ -42,7 +46,7 @@ const sendOtp = async (email) => {
     );
 
     if (!user) {
-        throw new Error('User not found');
+        throw new Error("User not found");
     }
 
     // Send OTP Email
@@ -56,16 +60,16 @@ const verifyOtp = async (email, otp) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-        throw new Error('User not found');
+        throw new Error("User not found");
     }
 
     if (user.otp !== otp) {
-        throw new Error('Invalid OTP');
+        throw new Error("Invalid OTP");
     }
 
     const now = new Date();
     if (now > user.otpExpiration) {
-        throw new Error('OTP expired');
+        throw new Error("OTP expired");
     }
 
     await User.findByIdAndUpdate(user._id, { otp: null, otpExpiration: null });
