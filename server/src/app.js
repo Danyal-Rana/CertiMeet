@@ -28,7 +28,7 @@ app.use(session({
 }));
 
 // Routes
-app.use("/api/v1/users", userRouter);  
+app.use("/api/v1/user", userRouter);  
 
 
 export default app;
