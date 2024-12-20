@@ -1,5 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import { User } from '../models/user.model.js';
+import { uploadOnCloudinary } from '../utils/cloudinary.js';
+
 
 // Change Password
 const changePassword = asyncHandler(async (req, res) => {
@@ -67,19 +69,33 @@ const changeEmail = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: 'Email changed successfully.' });
 });
 
-// Change Avatar
-const changeAvatar = asyncHandler(async (req, res) => {
-    const { newAvatarUrl } = req.body;
+// Upload Avatar
+const uploadAvatar = asyncHandler(async (req, res) => {
+    const avatarLocalPath = req.file?.path;
 
-    const user = req.user; // Get user object from the request
-    if (!user) {
-        return res.status(401).json({ message: 'Unauthorized. Please log in again.' });
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar file is required.");
     }
 
-    user.avatar = newAvatarUrl;
-    await user.save();
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
 
-    return res.status(200).json({ message: 'Avatar updated successfully.' });
+    if (!avatar.url) {
+        throw new ApiError(500, "Avatar uploading failed.");
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                avatar: avatar.url
+            }
+        },
+        {new: true}
+    ).select("-password");
+
+    return res
+    .status(200)
+    .json (new ApiResponse(200, user, "Avatar updated successfully."));
 });
 
-export { changePassword, changeFullName, changeUsername, changeEmail, changeAvatar };
+export { changePassword, changeFullName, changeUsername, changeEmail, uploadAvatar };
