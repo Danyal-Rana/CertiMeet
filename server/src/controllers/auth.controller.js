@@ -34,20 +34,15 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
 
-    if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar file is required");
+    if (avatarLocalPath) {
+        avatar = await uploadOnCloudinary(avatarLocalPath);
     }
 
-    const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-
-    // Send OTP before saving the user
     await sendOtp(email);
 
     // Create user with isVerified set to false
     const user = await User.create({
         fullName,
-        avatar: avatar.url,
         email,
         password,
         username: username.toLowerCase(),
