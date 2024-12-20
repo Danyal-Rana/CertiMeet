@@ -7,11 +7,17 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 
 // Change Password
 const changePassword = asyncHandler(async (req, res) => {
-    const { newPassword } = req.body;
+    const {oldPassword, newPassword } = req.body;
 
     const user = req.user; // Get user object from the request
     if (!user) {
         return res.status(401).json({ message: 'Unauthorized. Please log in again.' });
+    }
+
+    // check if current password is correct
+    const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+    if (!isPasswordValid) {
+        return res.status(400).json({ message: 'Invalid current password.' });
     }
 
     user.password = newPassword; // Password hashing is handled by the model pre-save hook
