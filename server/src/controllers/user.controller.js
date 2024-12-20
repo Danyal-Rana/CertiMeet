@@ -80,8 +80,11 @@ const changeEmail = asyncHandler(async (req, res) => {
     }
 
     // sending otp to old email
-    await sendOtp(user.email);
-    
+    const otpResponse = await sendOtp(user.email);
+
+    if (!otpResponse.success) {
+        return res.status(500).json({ message: 'Failed to send OTP to old email.' });
+    }    
 
     user.email = newEmail;
     await user.save();
