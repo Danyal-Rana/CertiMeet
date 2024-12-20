@@ -38,8 +38,6 @@ const registerUser = asyncHandler(async (req, res) => {
         avatar = await uploadOnCloudinary(avatarLocalPath);
     }
 
-    await sendOtp(email);
-
     // Create user with isVerified set to false
     const user = await User.create({
         fullName,
@@ -48,6 +46,8 @@ const registerUser = asyncHandler(async (req, res) => {
         username: username.toLowerCase(),
         isVerified: false, // Mark as unverified initially
     });
+
+    await sendOtp(email);
 
     return res.status(200).json(new ApiResponse(200, {}, "User created. Please verify your email."));
 });
