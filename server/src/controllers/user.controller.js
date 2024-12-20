@@ -51,7 +51,7 @@ const changeUsername = asyncHandler(async (req, res) => {
     }
 
     // Ensure the username is not already taken
-    const existingUser = await User.findOne({ username: newUsername });
+    const existingUser = await User.findOne({ username: newUsername.toLowerCase() });
     if (existingUser) {
         return res.status(400).json({ message: 'Username already taken. Please choose another.' });
     }
