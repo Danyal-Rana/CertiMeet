@@ -1,14 +1,16 @@
 import { Router } from "express";
 import { 
-    loginUser, 
-    logoutUser, 
-    registerUser, 
     changePassword, 
     changeFullName, 
     changeUsername, 
     changeEmail, 
     uploadAvatar 
 } from "../controllers/user.controller.js";
+import {
+    registerUser,
+    loginUser,
+    logoutUser
+} from "../controllers/auth.controller.js"
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
