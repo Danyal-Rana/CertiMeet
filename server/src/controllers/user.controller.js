@@ -3,6 +3,7 @@ import { User } from '../models/user.model.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { sendOtp } from '../services/otp.service.js';
 
 
 // Change Password
@@ -70,6 +71,17 @@ const changeEmail = asyncHandler(async (req, res) => {
     if (!user) {
         return res.status(401).json({ message: 'Unauthorized. Please log in again.' });
     }
+
+    // Ensure the email is not already taken
+    const isMailTaken = await User.findOne({ email: newEmail.toLowerCase() });
+
+    if (isMailTaken) {
+        return res.status(400).json({ message: 'Email already taken. Please choose another.' });
+    }
+
+    // sending otp to old email
+    await sendOtp(user.email);
+    
 
     user.email = newEmail;
     await user.save();
