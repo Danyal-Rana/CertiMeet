@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import userRouter from './routes/user.routes.js';
 
 const app = express();
 
@@ -25,6 +26,9 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false } // Set to true if you're using HTTPS
 }));
+
+// Routes
+app.use("/api/v1/users", userRouter);  
 
 
 export default app;

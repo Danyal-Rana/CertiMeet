@@ -3,8 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import jwt from "jsonwebtoken";
-import { sendOtp, verifyOtp } from '../services/otp.service.js';  // Importing the OTP service
+import { sendOtp, verifyOtp } from '../services/otp.service.js';
 
 // Helper function to generate Access and Refresh Tokens
 const generateAccessAndRefreshTokens = async (userId) => {
