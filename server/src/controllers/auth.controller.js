@@ -34,7 +34,6 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required");
@@ -50,7 +49,6 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create({
         fullName,
         avatar: avatar.url,
-        coverImage: coverImage?.url || "",
         email,
         password,
         username: username.toLowerCase(),
@@ -64,12 +62,22 @@ const registerUser = asyncHandler(async (req, res) => {
 const requestOtpForSignup = asyncHandler(async (req, res) => {
     const { email } = req.body;
 
+    // Check if the user already exists
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
-        return res.status(400).json({ message: 'Email already registered' });
+        if (existingUser.isVerified) {
+            // User already has a verified account
+            return res.status(400).json({ message: 'Email already registered and verified.' });
+        } else {
+            // User exists but is not verified; allow requesting a new OTP
+            await sendOtp(email); // Resend OTP
+            return res.status(200).json({ message: 'OTP resent to your email. Please verify your email.' });
+        }
     }
 
-    await sendOtp(email);  // Send OTP to email
+    // If the user doesn't exist, handle as a new signup
+    await sendOtp(email); // Send OTP for the first time
     return res.status(200).json({ message: 'OTP sent to your email. Please verify your email.' });
 });
 
