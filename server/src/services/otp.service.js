@@ -13,6 +13,7 @@ const sendOtpEmail = async (email, otp) => {
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT,
         secure: false, // True for 465, false for other ports
+        // service: "gmail",
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
