@@ -17,6 +17,10 @@ const sendOtpEmail = async (email, otp) => {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
         },
+        debug: true,  // Enable debug for more detailed logs
+        tls: {
+            rejectUnauthorized: false, // Helps prevent SSL/TLS issues
+        },
     });
 
     const { subject, text, html } = otpMailTemplate(otp);
