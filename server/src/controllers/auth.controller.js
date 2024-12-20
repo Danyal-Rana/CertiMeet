@@ -146,74 +146,6 @@ const loginUser = asyncHandler(async (req, res) => {
         );
 });
 
-// Request OTP for Forgot Password
-const requestOtpForPasswordReset = asyncHandler(async (req, res) => {
-    const { email } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
-
-    await sendOtp(email);  // Send OTP to email for password reset
-    return res.status(200).json({ message: 'OTP sent to your email for password reset.' });
-});
-
-// Verify OTP for Forgot Password
-const verifyOtpForPasswordReset = asyncHandler(async (req, res) => {
-    const { email, otp, newPassword } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
-
-    try {
-        // Verify OTP using otp.service
-        await verifyOtp(email, otp); // Verify OTP
-        user.password = newPassword; // Update password
-        await user.save();
-
-        return res.status(200).json({ message: 'Password reset successfully.' });
-    } catch (error) {
-        return res.status(400).json({ message: error.message });
-    }
-});
-
-// Request OTP for Change Email
-const requestOtpForChangeEmail = asyncHandler(async (req, res) => {
-    const { email, newEmail } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
-
-    await sendOtp(newEmail); // Send OTP to new email
-    return res.status(200).json({ message: 'OTP sent to the new email for verification.' });
-});
-
-// Verify OTP for Change Email
-const verifyOtpForChangeEmail = asyncHandler(async (req, res) => {
-    const { email, otp, newEmail } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
-
-    try {
-        // Verify OTP using otp.service
-        await verifyOtp(email, otp); // Verify OTP
-        user.email = newEmail; // Update email
-        await user.save();
-
-        return res.status(200).json({ message: 'Email changed successfully.' });
-    } catch (error) {
-        return res.status(400).json({ message: error.message });
-    }
-});
-
 // Logout the user (clear refreshToken cookie)
 const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, { $set: { refreshToken: undefined } }, { new: true });
@@ -234,9 +166,5 @@ export {
     loginUser, 
     logoutUser, 
     requestOtpForSignup, 
-    verifyOtpForSignup, 
-    requestOtpForPasswordReset, 
-    verifyOtpForPasswordReset, 
-    requestOtpForChangeEmail, 
-    verifyOtpForChangeEmail 
+    verifyOtpForSignup,
 };
