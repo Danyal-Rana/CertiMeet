@@ -24,7 +24,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const { username, email, fullName, password } = req.body;
 
     if ([fullName, email, username, password].some((field) => field?.trim() === "")) {
-        throw new ApiError(400, "All fields are required");
+        throw new ApiError(400, "All fields are required.");
     }
 
     const existedUser = await User.findOne({ $or: [{ username }, { email }] });
@@ -32,24 +32,35 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409, "User already exists.");
     }
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-
+    let avatar = null;
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
     if (avatarLocalPath) {
-        avatar = await uploadOnCloudinary(avatarLocalPath);
+        try {
+            avatar = await uploadOnCloudinary(avatarLocalPath);
+        } catch (error) {
+            throw new ApiError(500, "Failed to upload avatar.");
+        }
     }
 
-    // Create user with isVerified set to false
     const user = await User.create({
         fullName,
         email,
         password,
         username: username.toLowerCase(),
-        isVerified: false, // Mark as unverified initially
+        avatar,
+        isVerified: false,
     });
 
-    await sendOtp(email);
+    try {
+        await sendOtp(email);
+    } catch (error) {
+        await User.findByIdAndDelete(user._id);
+        throw new ApiError(500, "Failed to send OTP.");
+    }
 
-    return res.status(200).json(new ApiResponse(200, {}, "User created. Please verify your email."));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, { email }, "User created. Please verify your email."));
 });
 
 // OTP for Signup (send OTP to email)
@@ -75,30 +86,29 @@ const requestOtpForSignup = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: 'OTP sent to your email. Please verify your email.' });
 });
 
-// Verify OTP after Signup
 const verifyOtpForSignup = asyncHandler(async (req, res) => {
-    const { email, otp } = req.body;
+    const { otp } = req.body;
+    const email = req.body.email; // Frontend passes stored email
 
-    // Find the user by email
+    if (!email) {
+        return res.status(400).json({ message: "Email is missing. Please try again." });
+    }
+
     const user = await User.findOne({ email });
-
     if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        return res.status(404).json({ message: "User not found" });
     }
 
     try {
-        // Verify the OTP using the otp.service
         await verifyOtp(email, otp);
 
-        // Set user as verified
         user.isVerified = true;
-        // clearing otp and otpExpiration
         user.otp = undefined;
         user.otpExpiration = undefined;
-        
+
         await user.save();
 
-        return res.status(200).json({ message: 'OTP verified successfully. Your account is now verified.' });
+        return res.status(200).json({ message: "OTP verified successfully. Your account is now verified." });
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }

@@ -9,8 +9,10 @@ import {
 import {
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    verifyOtpForSignup
 } from "../controllers/auth.controller.js"
+import { verifyOtp } from "../services/otp.service.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -18,6 +20,9 @@ const router = Router();
 
 // Register user route (no avatar upload here)
 router.route("/register").post(registerUser);
+
+// Verify OTP route
+router.route("/verify-otp").post(verifyOtpForSignup);
 
 // Login user route
 router.route("/login").post(loginUser);
