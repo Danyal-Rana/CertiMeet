@@ -43,6 +43,6 @@ router.route("/change-username").put(verifyJWT, changeUsername);
 router.route("/change-email").put(verifyJWT, changeEmail);
 
 // Upload avatar (protected)
-router.route("/upload-avatar").put(verifyJWT, upload.single("avatar"), uploadAvatar);
+router.route("/upload-avatar").post(verifyJWT, upload.single("avatar"), uploadAvatar);
 
 export default router;
