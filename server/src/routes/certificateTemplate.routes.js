@@ -3,7 +3,8 @@ import {
     createTemplate,
     getTemplateById,
     getUserTemplates,
-    deleteTemplate
+    deleteTemplate,
+    deleteAllTemplates
 } from "../controllers/certificateTemplate.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -19,5 +20,8 @@ router.route("/get-templates").get(verifyJWT, getUserTemplates);
 
 // Delete a specific template by ID (protected)
 router.route("/delete-template/:id").delete(verifyJWT, deleteTemplate);
+
+// Delete all templates for the logged-in user (protected)
+router.route("/delete-all-templates").delete(verifyJWT, deleteAllTemplates);
 
 export default router;

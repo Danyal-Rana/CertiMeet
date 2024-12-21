@@ -36,7 +36,7 @@ const getTemplateById = async (req, res) => {
 
         // Find the template in the database
         const template = await CertificateTemplate.findOne({ _id: id, createdBy: req.user.id });
-        console.log(`Template is: ${template}`);
+        // console.log(`Template is: ${template}`);
 
         if (!template) {
             return res.status(404).json({
@@ -85,4 +85,34 @@ const deleteTemplate = async (req, res) => {
     }
 };
 
-export { createTemplate, getTemplateById, getUserTemplates, deleteTemplate };
+// Delete all templates for the authenticated user
+const deleteAllTemplates = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Delete all templates belonging to the user
+        const result = await CertificateTemplate.deleteMany({ userId });
+
+        // If no templates were found, notify the user
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No templates found to delete.",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} templates deleted successfully.`,
+        });
+    } catch (error) {
+        console.error("Error deleting all templates:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete templates.",
+            error,
+        });
+    }
+};
+
+export { createTemplate, getTemplateById, getUserTemplates, deleteTemplate, deleteAllTemplates };
