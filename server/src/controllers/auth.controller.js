@@ -52,6 +52,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     try {
+        req.session.email = email;
         await sendOtp(email);
     } catch (error) {
         await User.findByIdAndDelete(user._id);
@@ -60,7 +61,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, { email }, "User created. Please verify your email."));
+        .json(new ApiResponse(200, null, "User created. Please verify your email."));
 });
 
 // OTP for Signup (send OTP to email)
@@ -88,7 +89,7 @@ const requestOtpForSignup = asyncHandler(async (req, res) => {
 
 const verifyOtpForSignup = asyncHandler(async (req, res) => {
     const { otp } = req.body;
-    const email = req.body.email; // Frontend passes stored email
+    const email = req.session.email; // Get email from session
 
     if (!email) {
         return res.status(400).json({ message: "Email is missing. Please try again." });
