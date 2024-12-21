@@ -22,7 +22,7 @@ const createTemplate = async (req, res) => {
 };
 
 // Fetch a single template by ID
-export const getTemplateById = async (req, res) => {
+const getTemplateById = async (req, res) => {
     try {
         const { id } = req.params;
 
