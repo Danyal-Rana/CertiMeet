@@ -35,7 +35,8 @@ const getTemplateById = async (req, res) => {
         }
 
         // Find the template in the database
-        const template = await CertificateTemplate.findOne({ _id: id, userId: req.user._id });
+        const template = await CertificateTemplate.findOne({ _id: id, createdBy: req.user.id });
+        console.log(`Template is: ${template}`);
 
         if (!template) {
             return res.status(404).json({
@@ -84,4 +85,4 @@ const deleteTemplate = async (req, res) => {
     }
 };
 
-export { createTemplate, getTemplateById ,getUserTemplates, deleteTemplate };
+export { createTemplate, getTemplateById, getUserTemplates, deleteTemplate };
