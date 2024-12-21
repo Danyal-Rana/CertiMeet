@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import userRouter from './routes/user.routes.js';
+import certificateRouter from './routes/certificateTemplate.routes.js';
 
 const app = express();
 
@@ -28,7 +29,8 @@ app.use(session({
 }));
 
 // Routes
-app.use("/api/v1/user", userRouter);  
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/certificateTemplates", certificateRouter);
 
 
 export default app;
