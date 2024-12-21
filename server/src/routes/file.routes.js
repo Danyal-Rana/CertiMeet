@@ -1,16 +1,29 @@
-import { Router } from 'express';
-import { uploadFile, processFile, getUserFiles } from '../controllers/file.controller.js';
-import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { Router } from "express";
+import { verifyJWT } from "../middleware/auth.middleware.js";  // Ensure the user is authenticated
+import {
+    uploadFile,
+    getAllFiles,
+    getFile,
+    deleteAllFiles,
+    deleteFile
+} from "../controllers/file.controller.js";  // Import controller functions
 
 const router = Router();
 
-// Upload file route (protected, requires JWT token)
-router.route('/upload').post(verifyJWT, uploadFile);
+// File upload route (POST)
+router.route("/upload").post(verifyJWT, uploadFile);  // Use multer to upload files (make sure multer middleware is set up)
 
-// Process uploaded file route (protected, requires JWT token)
-router.route('/process/:fileId').post(verifyJWT, processFile);
+// Get a specific file by its fileId (GET)
+router.route("/getFile/:fileId").get(verifyJWT, getFile);
 
-// Get all files uploaded by the user (protected, requires JWT token)
-router.route('/get-files').get(verifyJWT, getUserFiles);
+// Get all files of the logged-in user (GET)
+router.route("/getAllFiles").get(verifyJWT, getAllFiles);
+
+
+// Delete a specific file by fileId (DELETE)
+router.route("/deleteFile/:fileId").delete(verifyJWT, deleteFile);
+
+// Delete all files of the logged-in user (DELETE)
+router.route("/deleteAllFiles").delete(verifyJWT, deleteAllFiles);
 
 export default router;
