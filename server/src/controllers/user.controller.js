@@ -107,6 +107,7 @@ const uploadAvatar = asyncHandler(async (req, res) => {
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
+    // console.log("Avatar uploaded to Cloudinary:", avatar);
 
     if (!avatar?.url) {
         console.log("Failed to upload file to Cloudinary.");
