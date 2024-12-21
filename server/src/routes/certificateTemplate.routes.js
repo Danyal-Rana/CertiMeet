@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     createTemplate,
+    getTemplateById,
     getUserTemplates,
     deleteTemplate
 } from "../controllers/certificateTemplate.controller.js";
