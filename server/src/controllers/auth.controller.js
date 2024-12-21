@@ -119,31 +119,42 @@ const verifyOtpForSignup = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, username, password } = req.body;
 
+    // Ensure either email or username is provided
     if (!(email || username)) {
-        throw new ApiError(400, "Email or Username is required");
+        throw new ApiError(400, "Email or Username is required.");
     }
 
+    // Find the user by email or username
     const userExistence = await User.findOne({ $or: [{ username }, { email }] });
     if (!userExistence) {
-        throw new ApiError(404, "User not found");
+        throw new ApiError(404, "User not found.");
     }
 
+    // Verify the password
     const isPasswordValid = await userExistence.isPasswordCorrect(password);
     if (!isPasswordValid) {
-        throw new ApiError(401, "Invalid password");
+        throw new ApiError(401, "Invalid password.");
     }
 
     // Check if the user is verified
     if (!userExistence.isVerified) {
-        throw new ApiError(401, "Please verify your email before logging in.");
+        // Set the email in session for OTP verification and redirect response
+        req.session.email = userExistence.email;
+
+        return res.status(401).json({
+            message: "Please verify your email to continue.",
+            redirectTo: "/otp-verification", // URL for frontend to redirect
+            email: userExistence.email, // Include email for frontend to pre-fill
+        });
     }
 
+    // Generate access and refresh tokens for verified users
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(userExistence._id);
     const loggedInUser = await User.findById(userExistence._id).select("-password -refreshToken");
 
     const options = {
         httpOnly: true,
-        secure: true,
+        secure: true, // Set true for production with HTTPS
     };
 
     return res
