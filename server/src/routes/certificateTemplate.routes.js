@@ -11,6 +11,8 @@ const router = Router();
 // Create a new certificate template (protected)
 router.route("/create-template").post(verifyJWT, createTemplate);
 
+router.get('/get-template/:id', verifyJWT, getTemplateById); // Get a single template by ID
+
 // Fetch all templates for the logged-in user (protected)
 router.route("/get-templates").get(verifyJWT, getUserTemplates);
 
