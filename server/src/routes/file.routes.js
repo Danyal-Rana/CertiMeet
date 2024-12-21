@@ -1,17 +1,18 @@
 import { Router } from "express";
-import { verifyJWT } from "../middleware/auth.middleware.js";  // Ensure the user is authenticated
 import {
     uploadFile,
     getAllFiles,
     getFile,
     deleteAllFiles,
     deleteFile
-} from "../controllers/file.controller.js";  // Import controller functions
+} from "../controllers/file.controller.js"; 
+import { upload } from "../middleware/multer.middleware.js";
+import { verifyJWT } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 // File upload route (POST)
-router.route("/upload").post(verifyJWT, uploadFile);  // Use multer to upload files (make sure multer middleware is set up)
+router.route("/upload").post(verifyJWT, upload.single("avatar"), uploadFile); 
 
 // Get a specific file by its fileId (GET)
 router.route("/getFile/:fileId").get(verifyJWT, getFile);
