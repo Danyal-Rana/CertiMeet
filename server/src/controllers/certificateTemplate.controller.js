@@ -21,6 +21,45 @@ const createTemplate = async (req, res) => {
     }
 };
 
+// Fetch a single template by ID
+export const getTemplateById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate the template ID
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Template ID is required.",
+            });
+        }
+
+        // Find the template in the database
+        const template = await CertificateTemplate.findOne({ _id: id, userId: req.user._id });
+
+        if (!template) {
+            return res.status(404).json({
+                success: false,
+                message: "Template not found.",
+            });
+        }
+
+        // Return the template
+        res.status(200).json({
+            success: true,
+            message: "Template retrieved successfully.",
+            template,
+        });
+    } catch (error) {
+        console.error("Error fetching template:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve template.",
+            error,
+        });
+    }
+};
+
 const getUserTemplates = async (req, res) => {
     try {
         const templates = await CertificateTemplate.find({ createdBy: req.user.id });
@@ -45,4 +84,4 @@ const deleteTemplate = async (req, res) => {
     }
 };
 
-export { createTemplate, getUserTemplates, deleteTemplate };
+export { createTemplate, getTemplateById ,getUserTemplates, deleteTemplate };
