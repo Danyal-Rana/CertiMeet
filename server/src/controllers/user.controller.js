@@ -104,24 +104,23 @@ const uploadAvatar = asyncHandler(async (req, res) => {
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
+    console.log("Cloudinary Response:", avatar);
 
-    if (!avatar.url) {
+    if (!avatar || !avatar.url) {
         throw new ApiError(500, "Avatar uploading failed.");
     }
 
     const user = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                avatar: avatar.url
-            }
+            $set: { avatar: avatar.url },
         },
-        {new: true}
+        { new: true }
     ).select("-password");
 
     return res
-    .status(200)
-    .json (new ApiResponse(200, user, "Avatar updated successfully."));
+        .status(200)
+        .json(new ApiResponse(200, user, "Avatar updated successfully."));
 });
 
 export { changePassword, changeFullName, changeUsername, changeEmail, uploadAvatar };
