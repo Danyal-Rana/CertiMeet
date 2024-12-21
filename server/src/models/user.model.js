@@ -71,8 +71,8 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.isPasswordCorrect = async function (password) {
     try {
         // The 'this' refers to the user object
-        console.log(`Database Password: ${this.password}`);
-        console.log(`oldPassword: ${password}`);
+        // console.log(`Database Password: ${this.password}`);
+        // console.log(`oldPassword: ${password}`);
         return await bcrypt.compare(password, this.password);
     } catch (error) {
         throw new Error('Error while comparing passwords');
