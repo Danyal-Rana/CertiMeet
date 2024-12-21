@@ -136,14 +136,14 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid password.");
     }
 
+    // Set the email in session for OTP verification and redirect response
+    req.session.email = userExistence.email;
+
     // Check if the user is verified
     if (!userExistence.isVerified) {
-        // Set the email in session for OTP verification and redirect response
-        req.session.email = userExistence.email;
-
         return res.status(401).json({
             message: "Please verify your email to continue.",
-            redirectTo: "/otp-verification", // URL for frontend to redirect
+            redirectTo: "/verify-otp", // URL for frontend to redirect
             email: userExistence.email, // Include email for frontend to pre-fill
         });
     }
