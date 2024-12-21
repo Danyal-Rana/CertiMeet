@@ -11,8 +11,8 @@ const changePassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
     const user = await User.findById(req.user._id).select("+password");
-    console.log(`User: ${user}`);
-    console.log(`Db password is ${user.password}`);
+    // console.log(`User: ${user}`);
+    // console.log(`Db password is ${user.password}`);
     if (!user) {
         return res.status(401).json({ message: 'Unauthorized. Please log in again.' });
     }
