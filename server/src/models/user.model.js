@@ -67,10 +67,16 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-
 // .methods already has many functions, also we can add our own custom function to it
 userSchema.methods.isPasswordCorrect = async function (password) {
-    return await bcrypt.compare(password, this.password);
+    try {
+        // The 'this' refers to the user object
+        console.log(`Database Password: ${this.password}`);
+        console.log(`oldPassword: ${password}`);
+        return await bcrypt.compare(password, this.password);
+    } catch (error) {
+        throw new Error('Error while comparing passwords');
+    }
 };
 
 // .sign genertes the token, it takes 3 arguments, 1st is payload(data){}, 2nd is secret key, 3rd is expiry date{}

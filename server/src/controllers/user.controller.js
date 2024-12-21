@@ -8,20 +8,23 @@ import { sendOtp } from '../services/otp.service.js';
 
 // Change Password
 const changePassword = asyncHandler(async (req, res) => {
-    const {oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
-    const user = req.user; // Get user object from the request
+    const user = await User.findById(req.user._id).select("+password");
+    console.log(`User: ${user}`);
+    console.log(`Db password is ${user.password}`);
     if (!user) {
         return res.status(401).json({ message: 'Unauthorized. Please log in again.' });
     }
 
-    // check if current password is correct
+    // Check if the current password is correct
     const isPasswordValid = await user.isPasswordCorrect(oldPassword);
     if (!isPasswordValid) {
         return res.status(400).json({ message: 'Invalid current password.' });
     }
 
-    user.password = newPassword; // Password hashing is handled by the model pre-save hook
+    // Hash the new password before saving
+    user.password = newPassword;  // This will trigger the pre-save hook for hashing the password
     await user.save();
 
     return res.status(200).json({ message: 'Password changed successfully.' });
