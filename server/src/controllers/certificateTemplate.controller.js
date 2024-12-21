@@ -90,11 +90,11 @@ const deleteAllTemplates = async (req, res) => {
     try {
         const userId = req.user._id;  // Ensure this is coming from JWT payload
 
-        console.log("Deleting templates for userId:", userId);
+        // console.log("Deleting templates for userId:", userId);
 
         // Delete all templates belonging to the authenticated user
         const result = await CertificateTemplate.deleteMany({ createdBy: String(userId) });
-        console.log("Delete result:", result);
+        // console.log("Delete result:", result);
 
         // If no templates were found, notify the user
         if (result.deletedCount === 0) {
