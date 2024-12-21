@@ -1,131 +1,171 @@
+import cloudinary from '../utils/cloudinary.js';  // Assuming you have Cloudinary configuration in a separate file
 import File from '../models/file.model.js';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import csv from 'csv-parser';
-import * as XLSX from 'xlsx'; // For Excel files
+import { v4 as uuidv4 } from 'uuid';  // To generate a unique name for files
 
-// Set up multer for file upload (this will save files locally, you can modify it to use cloud storage)
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, './public/files'); // Local upload directory
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique file name
-    }
-});
-
-const upload = multer({ storage: storage }).single('file'); // Handle single file upload
-
-// Controller function to upload file
-const uploadFile = (req, res) => {
-    upload(req, res, async (err) => {
-        if (err) {
+// Handle file upload
+const uploadFile = async (req, res) => {
+    try {
+        const file = req.file;  // Assuming you're using multer to handle file uploads
+        if (!file) {
             return res.status(400).json({
                 success: false,
-                message: 'Error uploading file.',
-                error: err
+                message: "No file uploaded.",
             });
         }
 
-        const { userId } = req.user; // Get the user from JWT
-        const fileType = path.extname(req.file.originalname).toLowerCase() === '.csv' ? 'csv' : 'xlsx'; // Check file type
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(file.path, {
+            resource_type: 'auto',  // Automatically determine file type (image, video, etc.)
+            public_id: `certimeet/${uuidv4()}`,  // Generate a unique public_id
+        });
 
+        // Save file details in database
         const newFile = new File({
-            fileName: req.file.originalname,
-            filePath: req.file.path,
-            owner: userId,
-            type: fileType,
+            fileName: file.originalname,
+            owner: req.user._id,  // User ID from JWT token
+            type: file.mimetype.split('/')[1],  // 'csv' or 'xlsx'
+            public_id: result.public_id,
+            secure_url: result.secure_url,
         });
 
         await newFile.save();
 
         res.status(200).json({
             success: true,
-            message: 'File uploaded successfully.',
-            file: newFile
+            message: "File uploaded successfully.",
+            file: newFile,
         });
-    });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Error uploading file.",
+            error,
+        });
+    }
 };
 
-// Controller function to process the uploaded CSV/Excel file and extract data (name, email)
-const processFile = async (req, res) => {
-    const { fileId } = req.params;
-
+// Get a specific file of the logged-in user
+const getFile = async (req, res) => {
     try {
-        const file = await File.findById(fileId);
+        const { fileId } = req.params;  // fileId will be the _id of the file document
+
+        const file = await File.findOne({ _id: fileId, owner: req.user._id });
 
         if (!file) {
-            return res.status(404).json({ success: false, message: 'File not found.' });
-        }
-
-        const data = [];
-        const filePath = file.filePath;
-
-        if (file.type === 'csv') {
-            fs.createReadStream(filePath)
-                .pipe(csv())
-                .on('data', (row) => {
-                    const { name, email } = row;
-                    if (name && email) {
-                        data.push({ name, email });
-                    }
-                })
-                .on('end', async () => {
-                    // Mark file as processed
-                    file.status = 'processed';
-                    await file.save();
-
-                    res.status(200).json({
-                        success: true,
-                        message: 'File processed successfully.',
-                        data
-                    });
-                });
-        } else if (file.type === 'xlsx') {
-            const workbook = XLSX.readFile(filePath);
-            const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
-            const sheet = workbook.Sheets[sheetName];
-
-            const rows = XLSX.utils.sheet_to_json(sheet);
-            for (let row of rows) {
-                const { name, email } = row;
-                if (name && email) {
-                    data.push({ name, email });
-                }
-            }
-
-            // Mark file as processed
-            file.status = 'processed';
-            await file.save();
-
-            res.status(200).json({
-                success: true,
-                message: 'File processed successfully.',
-                data
+            return res.status(404).json({
+                success: false,
+                message: "File not found.",
             });
-        } else {
-            res.status(400).json({ success: false, message: 'Invalid file type.' });
         }
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error processing file.', error });
-    }
-};
 
-// Get all files uploaded by the user
-const getUserFiles = async (req, res) => {
-    const { userId } = req.user; // Get user ID from JWT
-
-    try {
-        const files = await File.find({ owner: userId });
         res.status(200).json({
             success: true,
-            message: 'Files fetched successfully.',
-            files
+            file,
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error fetching files.', error });
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Error retrieving file.",
+            error,
+        });
     }
 };
 
-export { uploadFile, processFile, getUserFiles };
+// Get all files of the logged-in user
+const getUserFiles = async (req, res) => {
+    try {
+        const files = await File.find({ owner: req.user._id });
+
+        if (files.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No files found for this user.",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            files,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Error retrieving files.",
+            error,
+        });
+    }
+};
+
+// Delete a specific file of the logged-in user
+const deleteFile = async (req, res) => {
+    try {
+        const { fileId } = req.params;  // fileId will be the _id of the file document
+
+        const file = await File.findOne({ _id: fileId, owner: req.user._id });
+
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                message: "File not found.",
+            });
+        }
+
+        // Delete from Cloudinary
+        await cloudinary.uploader.destroy(file.public_id);
+
+        // Delete from the database
+        await File.deleteOne({ _id: fileId });
+
+        res.status(200).json({
+            success: true,
+            message: "File deleted successfully.",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting file.",
+            error,
+        });
+    }
+};
+
+
+// Delete all files of the logged-in user
+const deleteAllFiles = async (req, res) => {
+    try {
+        const files = await File.find({ owner: req.user._id });
+
+        if (files.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No files found to delete.",
+            });
+        }
+
+        // Delete files from Cloudinary
+        for (const file of files) {
+            await cloudinary.uploader.destroy(file.public_id);  // Remove from Cloudinary
+        }
+
+        // Delete files from database
+        await File.deleteMany({ owner: req.user._id });
+
+        res.status(200).json({
+            success: true,
+            message: "All files deleted successfully.",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting files.",
+            error,
+        });
+    }
+};
+
+export { uploadFile, getFile, getUserFiles, deleteFile, deleteAllFiles };
