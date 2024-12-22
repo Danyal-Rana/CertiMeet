@@ -101,7 +101,7 @@ const getAllFiles = async (req, res) => {
 // Delete a specific file of the logged-in user
 const deleteFile = async (req, res) => {
     try {
-        const { fileId } = req.params;  // fileId will be the _id of the file document
+        const { fileId } = req.params;  
 
         const file = await File.findOne({ _id: fileId, owner: req.user._id });
 
@@ -113,7 +113,7 @@ const deleteFile = async (req, res) => {
         }
 
         // Delete from Cloudinary
-        await cloudinary.uploader.destroy(file.public_id);
+        // await cloudinary.uploader.destroy(file.public_id);
 
         // Delete from the database
         await File.deleteOne({ _id: fileId });
@@ -146,9 +146,9 @@ const deleteAllFiles = async (req, res) => {
         }
 
         // Delete files from Cloudinary
-        for (const file of files) {
-            await cloudinary.uploader.destroy(file.public_id);  // Remove from Cloudinary
-        }
+        // for (const file of files) {
+        //     await cloudinary.uploader.destroy(file.public_id);
+        // }
 
         // Delete files from database
         await File.deleteMany({ owner: req.user._id });
