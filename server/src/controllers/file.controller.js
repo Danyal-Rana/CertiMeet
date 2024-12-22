@@ -5,8 +5,10 @@ import { v4 as uuidv4 } from 'uuid';  // To generate a unique name for files
 // Handle file upload
 const uploadFile = async (req, res) => {
     try {
-        const file = req.file;  // Assuming you're using multer to handle file uploads
+        const file = req.file;
+        // console.log(`File is: ${file}`);
         if (!file) {
+            // console.log('No file uploaded.');
             return res.status(400).json({
                 success: false,
                 message: "No file uploaded.",
@@ -14,10 +16,7 @@ const uploadFile = async (req, res) => {
         }
 
         // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(file.path, {
-            resource_type: 'auto',  // Automatically determine file type (image, video, etc.)
-            public_id: `certimeet/${uuidv4()}`,  // Generate a unique public_id
-        });
+        const result = await uploadOnCloudinary(file.path);
 
         // Save file details in database
         const newFile = new File({
