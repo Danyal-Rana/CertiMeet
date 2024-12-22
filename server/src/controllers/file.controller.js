@@ -74,7 +74,7 @@ const getFile = async (req, res) => {
 };
 
 // Get all files of the logged-in user
-const getUserFiles = async (req, res) => {
+const getAllFiles = async (req, res) => {
     try {
         const files = await File.find({ owner: req.user._id });
 
@@ -168,4 +168,4 @@ const deleteAllFiles = async (req, res) => {
     }
 };
 
-export { uploadFile, getFile, getUserFiles, deleteFile, deleteAllFiles };
+export { uploadFile, getFile, getAllFiles, deleteFile, deleteAllFiles };

@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
     uploadFile,
-    getAllFiles,
     getFile,
+    getAllFiles,
     deleteAllFiles,
     deleteFile
 } from "../controllers/file.controller.js"; 
