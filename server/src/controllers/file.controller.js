@@ -1,4 +1,4 @@
-import cloudinary from '../utils/cloudinary.js';  // Assuming you have Cloudinary configuration in a separate file
+import {uploadOnCloudinary} from '../utils/cloudinary.js';  // Assuming you have Cloudinary configuration in a separate file
 import File from '../models/file.model.js';
 import { v4 as uuidv4 } from 'uuid';  // To generate a unique name for files
 
