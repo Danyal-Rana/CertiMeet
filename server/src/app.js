@@ -5,6 +5,7 @@ import session from 'express-session';
 import userRouter from './routes/user.routes.js';
 import certificateRouter from './routes/certificateTemplate.routes.js';
 import fileRouter from './routes/file.routes.js';
+import genCertificateRouter from './routes/genCertificate.routes.js';
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use(session({
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/certificateTemplates", certificateRouter);
 app.use("/api/v1/files", fileRouter);
+app.use("/api/v1/genCertificates", genCertificateRouter);
 
 
 export default app;
