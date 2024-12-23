@@ -1,104 +1,96 @@
-import GenCertificate from "../models/genCertificate.model.js";
-import File from "../models/file.model.js";
-import { PDFDocument } from "pdf-lib";
+import { File } from "../models/file.model.js";
+import { CertificateTemplate } from "../models/certificateTemplate.model.js";
+import { PDFDocument, rgb } from "pdf-lib";
 import fs from "fs";
+import axios from "axios";
 import path from "path";
-import AdmZip from "adm-zip";
+import * as XLSX from "xlsx";
+import csvParser from "csv-parser";
+import QRCode from "qrcode";
+
+// Helper to download files from URLs
+const downloadFile = async (url, dest) => {
+    const writer = fs.createWriteStream(dest);
+    const response = await axios.get(url, { responseType: "stream" });
+    response.data.pipe(writer);
+    return new Promise((resolve, reject) => {
+        writer.on("finish", resolve);
+        writer.on("error", reject);
+    });
+};
+
+const parseFile = async (filePath, type) => {
+    const data = [];
+    if (type === "csv") {
+        fs.createReadStream(filePath)
+            .pipe(csvParser())
+            .on("data", (row) => data.push(row))
+            .on("end", () => data);
+    } else if (type === "xlsx") {
+        const workbook = XLSX.readFile(filePath);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        return XLSX.utils.sheet_to_json(sheet);
+    }
+    return data;
+};
 
 const generateCertificates = async (req, res) => {
     try {
-        const { fileId, templateId, fieldMapping } = req.body; // User input
+        const { fileId, templateId, fieldMapping } = req.body;
 
-        // Step 1: Validate inputs
-        if (!fileId || !templateId || !fieldMapping) {
-            return res.status(400).json({
-                success: false,
-                message: "File ID, Template ID, and Field Mapping are required.",
-            });
-        }
-
-        // Step 2: Retrieve the file from the database
+        // Fetch file and template
         const file = await File.findById(fileId);
-        if (!file) {
-            return res.status(404).json({
-                success: false,
-                message: "Selected file not found.",
+        const template = await CertificateTemplate.findById(templateId);
+
+        if (!file || !template) {
+            return res.status(400).json({ success: false, message: "Invalid file or template ID" });
+        }
+
+        // Download file and template
+        const filePath = `./temp/${file.fileName}`;
+        const templatePath = `./temp/${template.name}`;
+        await downloadFile(file.secure_url, filePath);
+        await downloadFile(template.secure_url, templatePath);
+
+        // Parse file
+        const fileData = await parseFile(filePath, file.type);
+
+        // Load PDF template
+        const existingPdfBytes = fs.readFileSync(templatePath);
+        const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+        const generatedFiles = [];
+        for (const row of fileData) {
+            const pdf = await PDFDocument.load(existingPdfBytes);
+            const pages = pdf.getPages();
+            const page = pages[0];
+
+            // Insert dynamic data
+            Object.keys(fieldMapping).forEach((field) => {
+                const text = row[fieldMapping[field]] || "N/A";
+                page.drawText(text, { x: 50, y: 400, size: 12, color: rgb(0, 0, 0) });
             });
+
+            // Add QR code
+            const qrBytes = await QRCode.toBuffer(`https://verify.url/certificate/${row.id}`);
+            const qrImage = await pdf.embedPng(qrBytes);
+            page.drawImage(qrImage, { x: 450, y: 50, width: 100, height: 100 });
+
+            // Save file
+            const pdfBytes = await pdf.save();
+            const outputPath = `./certificates/${row[fieldMapping["name"]]}.pdf`;
+            fs.writeFileSync(outputPath, pdfBytes);
+            generatedFiles.push(outputPath);
         }
 
-        const filePath = file.filePath; // Assuming file model has a 'filePath' field
-        const templatePath = path.join(__dirname, `../templates/${templateId}.pdf`);
-
-        // Step 3: Parse the file (utility function for CSV/Excel parsing required)
-        const recipients = parseFile(filePath, fieldMapping); // [{ name, email, ... }]
-
-        if (!recipients || recipients.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "No valid data found in the file.",
-            });
-        }
-
-        // Step 4: Load the template and generate certificates
-        const templateBytes = fs.readFileSync(templatePath);
-        const generatedCertificates = [];
-        const errors = [];
-
-        for (const recipient of recipients) {
-            try {
-                const pdfDoc = await PDFDocument.load(templateBytes);
-                const pages = pdfDoc.getPages();
-                const firstPage = pages[0];
-
-                // Insert dynamic fields into the template
-                for (const [field, value] of Object.entries(fieldMapping)) {
-                    if (recipient[field]) {
-                        firstPage.drawText(recipient[field], { x: 150, y: 500 - 50 * Object.keys(fieldMapping).indexOf(field), size: 12 });
-                    } else {
-                        throw new Error(`Missing value for field: ${field}`);
-                    }
-                }
-
-                // Save generated PDF
-                const pdfBytes = await pdfDoc.save();
-                const outputPath = path.join(__dirname, `../output/${recipient.name}.pdf`);
-                fs.writeFileSync(outputPath, pdfBytes);
-
-                // Store certificate data
-                generatedCertificates.push({
-                    name: recipient.name,
-                    email: recipient.email,
-                    certificateUrl: `https://yourapp.com/output/${recipient.name}.pdf`,
-                });
-            } catch (err) {
-                // Log errors for missing/incomplete data
-                errors.push({ recipient, error: err.message });
-            }
-        }
-
-        // Save generation details in the database
-        const genCert = new GenCertificate({
-            templateId,
-            generatedBy: req.user._id,
-            recipients: generatedCertificates,
-            status: errors.length === 0 ? "completed" : "failed",
-        });
-
-        await genCert.save();
-
-        // Step 5: Return response
         res.status(200).json({
             success: true,
-            message: "Certificates generated.",
-            data: { generatedCertificates, errors },
+            message: "Certificates generated successfully.",
+            files: generatedFiles,
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Error generating certificates.",
-            error,
-        });
+        res.status(500).json({ success: false, message: "Error generating certificates.", error });
     }
 };
 
