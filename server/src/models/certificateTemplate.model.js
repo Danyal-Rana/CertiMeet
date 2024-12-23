@@ -24,4 +24,6 @@ const certificateTemplateSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-export default mongoose.model('CertificateTemplate', certificateTemplateSchema);
+const CertificateTemplate= mongoose.model('CertificateTemplate', certificateTemplateSchema);
+
+export default CertificateTemplate;
