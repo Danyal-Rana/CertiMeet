@@ -101,7 +101,7 @@ const generateCertificates = async (req, res) => {
 
         // Define file and template paths
         const filePath = `./public/genCertificate/${file.fileName}`;
-        const templatePath = `./public/genCertificate/${template.name}`;
+        const templatePath = `./public/genCertificate/${template.templateName}`;
 
         // Download file if it's a URL
         await downloadFile(file.secure_url, filePath);
