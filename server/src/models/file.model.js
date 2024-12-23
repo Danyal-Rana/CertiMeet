@@ -12,7 +12,7 @@ const fileSchema = new mongoose.Schema({
     },
     type: { 
         type: String, 
-        enum: ['csv', 'xlsx'], 
+        enum: ["csv", "xlsx", "vnd.openxmlformats-officedocument.spreadsheetml.sheet"], 
         required: true 
     },
     public_id: { type: String },  // Cloudinary public_id
