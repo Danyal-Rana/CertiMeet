@@ -1,3 +1,4 @@
+import puppeteer from "puppeteer"; // Adding puppeteer for HTML to PDF conversion
 import File from "../models/file.model.js";
 import CertificateTemplate from "../models/certificateTemplate.model.js";
 import { PDFDocument, rgb } from "pdf-lib";
@@ -7,7 +8,6 @@ import path from "path";
 import * as XLSX from "xlsx";
 import csvParser from "csv-parser";
 import QRCode from "qrcode";
-import puppeteer from "puppeteer"; // Adding puppeteer for HTML to PDF conversion
 
 // Helper to download files from URLs or handle raw content
 const downloadFile = async (input, dest) => {
@@ -41,6 +41,22 @@ const convertHtmlToPdf = async (htmlContent, outputPath) => {
     console.log(`Converted HTML to PDF: ${outputPath}`);
 };
 
+// Function to parse files (CSV or XLSX)
+const parseFile = async (filePath, type) => {
+    const data = [];
+    if (type === "csv") {
+        fs.createReadStream(filePath)
+            .pipe(csvParser())
+            .on("data", (row) => data.push(row))
+            .on("end", () => console.log("CSV parsing completed"));
+    } else if (type === "xlsx") {
+        const workbook = XLSX.readFile(filePath);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        return XLSX.utils.sheet_to_json(sheet);
+    }
+    return data;
+};
+
 // Function to generate certificates
 const generateCertificates = async (req, res) => {
     try {
@@ -68,6 +84,9 @@ const generateCertificates = async (req, res) => {
 
         // Parse the file (CSV, XLSX, etc.)
         const fileData = await parseFile(filePath, file.type);
+        if (fileData.length === 0) {
+            return res.status(400).json({ success: false, message: "No data found in the file" });
+        }
 
         // Load PDF template
         const existingPdfBytes = fs.readFileSync(templatePath);
