@@ -1,5 +1,5 @@
-import { File } from "../models/file.model.js";
-import { CertificateTemplate } from "../models/certificateTemplate.model.js";
+import File from "../models/file.model.js";
+import CertificateTemplate from "../models/certificateTemplate.model.js";
 import { PDFDocument, rgb } from "pdf-lib";
 import fs from "fs";
 import axios from "axios";
