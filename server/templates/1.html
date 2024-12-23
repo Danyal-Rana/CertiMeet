@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Excellence</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .certificate-container {
+            width: 800px;
+            height: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 10px solid #2a2a2a;
+            border-radius: 15px;
+            background: #ffffff;
+            text-align: center;
+            position: relative;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .certificate-header {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2a2a2a;
+            margin-top: 20px;
+            text-transform: uppercase;
+        }
+
+        .certificate-subheader {
+            font-size: 20px;
+            color: #555555;
+            margin-top: 10px;
+        }
+
+        .recipient-name {
+            font-size: 32px;
+            color: #333333;
+            font-weight: bold;
+            margin: 30px 0;
+        }
+
+        .description {
+            font-size: 18px;
+            color: #666666;
+            line-height: 1.5;
+            margin: 20px 0;
+        }
+
+        .date {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 16px;
+            color: #666666;
+        }
+
+        .signature {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            text-align: center;
+        }
+
+        .signature img {
+            width: 120px;
+            height: auto;
+        }
+
+        .signature span {
+            font-size: 14px;
+            color: #555555;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="certificate-container">
+        <div class="certificate-header">Certificate of Excellence</div>
+        <div class="certificate-subheader">Presented to</div>
+        <div class="recipient-name">{name}</div>
+        <div class="description">
+            This certificate is awarded in recognition of your outstanding achievement and dedication.
+        </div>
+        <div class="date">{date}</div>
+        <div class="signature">
+            <img src="https://via.placeholder.com/120x40.png?text=Signature" alt="QR Code">
+            <span>QR code</span>
+        </div>
+    </div>
+</body>
+
+</html>
