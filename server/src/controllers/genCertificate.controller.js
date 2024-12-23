@@ -7,33 +7,41 @@ import path from "path";
 import * as XLSX from "xlsx";
 import csvParser from "csv-parser";
 import QRCode from "qrcode";
+import puppeteer from "puppeteer"; // Adding puppeteer for HTML to PDF conversion
 
-// Helper to download files from URLs
-const downloadFile = async (url, dest) => {
-    const writer = fs.createWriteStream(dest);
-    const response = await axios.get(url, { responseType: "stream" });
-    response.data.pipe(writer);
-    return new Promise((resolve, reject) => {
-        writer.on("finish", resolve);
-        writer.on("error", reject);
-    });
-};
-
-const parseFile = async (filePath, type) => {
-    const data = [];
-    if (type === "csv") {
-        fs.createReadStream(filePath)
-            .pipe(csvParser())
-            .on("data", (row) => data.push(row))
-            .on("end", () => data);
-    } else if (type === "xlsx") {
-        const workbook = XLSX.readFile(filePath);
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        return XLSX.utils.sheet_to_json(sheet);
+// Helper to download files from URLs or handle raw content
+const downloadFile = async (input, dest) => {
+    if (input && input.startsWith('http')) {
+        // If input is a URL, download the file
+        const writer = fs.createWriteStream(dest);
+        const response = await axios.get(input, { responseType: "stream" });
+        response.data.pipe(writer);
+        return new Promise((resolve, reject) => {
+            writer.on("finish", resolve);
+            writer.on("error", reject);
+        });
+    } else {
+        // If input is raw content (HTML), convert to PDF using Puppeteer
+        if (input && input.startsWith('<html>')) {
+            console.log("Converting HTML to PDF...");
+            await convertHtmlToPdf(input, dest);
+        } else {
+            console.log("No valid content provided.");
+        }
     }
-    return data;
 };
 
+// Function to convert HTML to PDF using Puppeteer
+const convertHtmlToPdf = async (htmlContent, outputPath) => {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    await page.pdf({ path: outputPath, format: 'A4' });
+    await browser.close();
+    console.log(`Converted HTML to PDF: ${outputPath}`);
+};
+
+// Function to generate certificates
 const generateCertificates = async (req, res) => {
     try {
         const { fileId, templateId, fieldMapping } = req.body;
@@ -46,13 +54,19 @@ const generateCertificates = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid file or template ID" });
         }
 
-        // Download file and template
-        const filePath = `./public/temp/${file.fileName}`;
-        const templatePath = `./public/temp/${template.name}`;
-        await downloadFile(file.secure_url, filePath);
-        await downloadFile(template.secure_url, templatePath);
+        // Define file and template paths
+        const filePath = `./public/genCertificate/${file.fileName}`;
+        const templatePath = `./public/genCertificate/${template.name}`;
 
-        // Parse file
+        // Download file if it's a URL
+        await downloadFile(file.secure_url, filePath);
+        console.log(`File has been downloaded to ${filePath}`);
+
+        // Download template (convert if HTML or use as PDF)
+        await downloadFile(template.htmlContent, templatePath);
+        console.log(`Template has been downloaded to ${templatePath}`);
+
+        // Parse the file (CSV, XLSX, etc.)
         const fileData = await parseFile(filePath, file.type);
 
         // Load PDF template
@@ -65,24 +79,25 @@ const generateCertificates = async (req, res) => {
             const pages = pdf.getPages();
             const page = pages[0];
 
-            // Insert dynamic data
+            // Insert dynamic data from the fieldMapping
             Object.keys(fieldMapping).forEach((field) => {
                 const text = row[fieldMapping[field]] || "N/A";
                 page.drawText(text, { x: 50, y: 400, size: 12, color: rgb(0, 0, 0) });
             });
 
-            // Add QR code
+            // Add QR code to the certificate
             const qrBytes = await QRCode.toBuffer(`https://verify.url/certificate/${row.id}`);
             const qrImage = await pdf.embedPng(qrBytes);
             page.drawImage(qrImage, { x: 450, y: 50, width: 100, height: 100 });
 
-            // Save file
+            // Save the generated PDF file
             const pdfBytes = await pdf.save();
             const outputPath = `./certificates/${row[fieldMapping["name"]]}.pdf`;
             fs.writeFileSync(outputPath, pdfBytes);
             generatedFiles.push(outputPath);
         }
 
+        // Return success response with generated files
         res.status(200).json({
             success: true,
             message: "Certificates generated successfully.",
