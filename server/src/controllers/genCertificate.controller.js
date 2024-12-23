@@ -5,7 +5,7 @@ import { PDFDocument, rgb } from "pdf-lib";
 import fs from "fs";
 import axios from "axios";
 import path from "path";
-import * as XLSX from "xlsx";
+import XLSX from "xlsx";
 import csvParser from "csv-parser";
 import QRCode from "qrcode";
 
@@ -44,17 +44,46 @@ const convertHtmlToPdf = async (htmlContent, outputPath) => {
 // Function to parse files (CSV or XLSX)
 const parseFile = async (filePath, type) => {
     const data = [];
+
+    // console.log('Parsing file:', filePath, 'with type:', type);
+
     if (type === "csv") {
-        fs.createReadStream(filePath)
-            .pipe(csvParser())
-            .on("data", (row) => data.push(row))
-            .on("end", () => console.log("CSV parsing completed"));
-    } else if (type === "xlsx") {
-        const workbook = XLSX.readFile(filePath);
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        return XLSX.utils.sheet_to_json(sheet);
+        // Handle CSV files
+        return new Promise((resolve, reject) => {
+            fs.createReadStream(filePath)
+                .pipe(csvParser())
+                .on("data", (row) => data.push(row))
+                .on("end", () => {
+                    // console.log("CSV parsing completed:", data);
+                    resolve(data);
+                })
+                .on("error", (error) => {
+                    console.error("Error parsing CSV:", error);
+                    reject(error);
+                });
+        });
+    } else if (type === "xlsx" || type === "vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+        // Handle XLSX files and its MIME type
+        try {
+            if (!fs.existsSync(filePath)) {
+                console.error("File does not exist:", filePath);
+                return [];
+            }
+
+            const workbook = XLSX.readFile(filePath); // Read the XLSX file
+            const sheet = workbook.Sheets[workbook.SheetNames[0]]; // Get the first sheet
+            const jsonData = XLSX.utils.sheet_to_json(sheet); // Convert sheet to JSON
+
+            // console.log("XLSX parsing completed:", jsonData);
+            return jsonData;
+        } catch (error) {
+            console.error("Error parsing XLSX file:", error);
+            return [];
+        }
     }
-    return data;
+
+    console.error("Unsupported file type:", type);
+    return data; // Return an empty array if type is unsupported
 };
 
 // Function to generate certificates
