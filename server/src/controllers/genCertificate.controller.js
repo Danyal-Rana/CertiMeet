@@ -47,8 +47,8 @@ const generateCertificates = async (req, res) => {
         }
 
         // Download file and template
-        const filePath = `./temp/${file.fileName}`;
-        const templatePath = `./temp/${template.name}`;
+        const filePath = `./public/temp/${file.fileName}`;
+        const templatePath = `./public/temp/${template.name}`;
         await downloadFile(file.secure_url, filePath);
         await downloadFile(template.secure_url, templatePath);
 
