@@ -103,10 +103,7 @@ const generateCertificates = async (req, res) => {
             console.log(`For placeholder "${placeholder}" in HTML content, found column "${columnMatch}" in file.`);
             fieldMapping[`{{${cleanPlaceholder}}}`] = columnMatch || cleanPlaceholder; // Store cleaned mapping
         });
-        console.log("Field mapping:", fieldMapping);
-
-
-        console.log("Field mapping:", fieldMapping);
+        // console.log("Field mapping:", fieldMapping);
 
 
         const htmlDir = "./public/htmlCertificates";
@@ -130,8 +127,8 @@ const generateCertificates = async (req, res) => {
                 const mappedColumn = fieldMapping[`{{${cleanPlaceholder}}}`]; // Ensure cleaned mapping is used
                 const value = row[mappedColumn] || "N/A"; // Fetch the value from row using mapped column
             
-                console.log(`Replacing placeholder "${placeholder}" with value "${value}"`);
-                console.log(`Mapping: placeholder -> column -> value | ${placeholder} -> ${mappedColumn} -> ${value}`);
+                // console.log(`Replacing placeholder "${placeholder}" with value "${value}"`);
+                // console.log(`Mapping: placeholder -> column -> value | ${placeholder} -> ${mappedColumn} -> ${value}`);
             
                 // Replace placeholder in the HTML content
                 htmlContent = htmlContent.replace(new RegExp(`{{\\s*${cleanPlaceholder}\\s*}}`, "g"), value);
