@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { generateCertificates } from "../controllers/genCertificate.controller.js";
+import { generateCertificates, downloadCertificates } from "../controllers/genCertificate.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -9,7 +9,7 @@ router.route("/generate").post(verifyJWT, generateCertificates);
 // router.post("/generate", verifyJWT, generateCertificates);
 
 // Route for downloading certificates as ZIP
-// router.route("/download/:genCertificateId").get(verifyJWT, prepareZipForDownload);
+router.route("/download").get(verifyJWT, downloadCertificates);
 // router.get("/download/:genCertificateId", verifyJWT, downloadCertificatesAsZip);
 
 export default router;
