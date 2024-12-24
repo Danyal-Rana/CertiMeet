@@ -101,7 +101,7 @@ const generateCertificates = async (req, res) => {
             const cleanPlaceholder = placeholder.replace(/{{\s*|\s*}}/g, "").toLowerCase();
             const columnMatch = columnNames.find((col) => col.toLowerCase() === cleanPlaceholder);
 
-            console.log(`For placeholder "${placeholder}" in HTML content, found column "${columnMatch}" in file.`);
+            // console.log(`For placeholder "${placeholder}" in HTML content, found column "${columnMatch}" in file.`);
             fieldMapping[`{{${cleanPlaceholder}}}`] = columnMatch || cleanPlaceholder; // Store cleaned mapping
         });
         // console.log("Field mapping:", fieldMapping);
@@ -116,12 +116,12 @@ const generateCertificates = async (req, res) => {
         for (const row of fileData) {
             let htmlContent = templateHtml;
 
-            console.log("Processing row:", row);
+            // console.log("Processing row:", row);
 
             // Replace placeholders with corresponding data
             // Extract placeholders from the HTML content
             const placeholders = [...templateHtml.matchAll(/{{\s*(\w+)\s*}}/g)].map((match) => match[1]);
-            console.log("Extracted placeholders:", placeholders);
+            // console.log("Extracted placeholders:", placeholders);
 
             placeholders.forEach((placeholder) => {
                 const cleanPlaceholder = placeholder.replace(/{{\s*|\s*}}/g, ""); // Clean "{{ }}" syntax
