@@ -97,16 +97,16 @@ const generateCertificates = async (req, res) => {
 
         const fieldMapping = {};
         placeholders.forEach((placeholder) => {
-            // Remove '{{' and '}}' from the placeholder
             const cleanPlaceholder = placeholder.replace(/{{\s*|\s*}}/g, "").toLowerCase();
-
-            // Find a matching column in the file
             const columnMatch = columnNames.find((col) => col.toLowerCase() === cleanPlaceholder);
-            
-            console.log(`For placeholder "${placeholder}" in HTML content, found column "${columnMatch}" in file.`);
 
-            fieldMapping[placeholder] = columnMatch || placeholder;
+            console.log(`For placeholder "${placeholder}" in HTML content, found column "${columnMatch}" in file.`);
+            fieldMapping[`{{${cleanPlaceholder}}}`] = columnMatch || cleanPlaceholder; // Store cleaned mapping
         });
+        console.log("Field mapping:", fieldMapping);
+
+
+        console.log("Field mapping:", fieldMapping);
 
 
         const htmlDir = "./public/htmlCertificates";
@@ -118,25 +118,40 @@ const generateCertificates = async (req, res) => {
         for (const row of fileData) {
             let htmlContent = templateHtml;
 
+            console.log("Processing row:", row);
+
             // Replace placeholders with corresponding data
+            // Extract placeholders from the HTML content
+            const placeholders = [...templateHtml.matchAll(/{{\s*(\w+)\s*}}/g)].map((match) => match[1]);
+            console.log("Extracted placeholders:", placeholders);
+
             placeholders.forEach((placeholder) => {
-                const value = row[fieldMapping[placeholder]] || "N/A";
-                htmlContent = htmlContent.replace(new RegExp(`{{${placeholder}}}`, "g"), value);
-            });
+                const cleanPlaceholder = placeholder.replace(/{{\s*|\s*}}/g, ""); // Clean "{{ }}" syntax
+                const mappedColumn = fieldMapping[`{{${cleanPlaceholder}}}`]; // Ensure cleaned mapping is used
+                const value = row[mappedColumn] || "N/A"; // Fetch the value from row using mapped column
+            
+                console.log(`Replacing placeholder "${placeholder}" with value "${value}"`);
+                console.log(`Mapping: placeholder -> column -> value | ${placeholder} -> ${mappedColumn} -> ${value}`);
+            
+                // Replace placeholder in the HTML content
+                htmlContent = htmlContent.replace(new RegExp(`{{\\s*${cleanPlaceholder}\\s*}}`, "g"), value);
+            });            
+
+
 
             // Add QR code dynamically (optional)
-            const qrCode = await QRCode.toDataURL(`https://verify.url/certificate/${row.id}`);
-            htmlContent = htmlContent.replace(/{{qrcode}}/g, `<img src="${qrCode}" alt="QR Code" />`);
+            // const qrCode = await QRCode.toDataURL(`https://verify.url/certificate/${row.id}`);
+            // htmlContent = htmlContent.replace(/{{qrcode}}/g, `<img src="${qrCode}" alt="QR Code" />`);
 
             const nameField = row[fieldMapping["name"]] || `certificate_${Date.now()}`;
             const htmlFileName = `${htmlDir}/${nameField}.html`;
             const pdfFileName = `${pdfDir}/${nameField}.pdf`;
 
             fs.writeFileSync(htmlFileName, htmlContent, "utf-8");
-            console.log(`HTML certificate generated: ${htmlFileName}`);
+            // console.log(`HTML certificate generated: ${htmlFileName}`);
 
             await convertHtmlToPdf(htmlContent, pdfFileName);
-            console.log(`PDF certificate generated: ${pdfFileName}`);
+            // console.log(`PDF certificate generated: ${pdfFileName}`);
 
             generatedFiles.push(pdfFileName);
         }
