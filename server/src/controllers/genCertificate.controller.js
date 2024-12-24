@@ -1,7 +1,6 @@
-import puppeteer from "puppeteer"; // Adding puppeteer for HTML to PDF conversion
+import puppeteer from "puppeteer"; // For HTML to PDF conversion
 import File from "../models/file.model.js";
 import CertificateTemplate from "../models/certificateTemplate.model.js";
-import { PDFDocument, rgb } from "pdf-lib";
 import fs from "fs";
 import axios from "axios";
 import path from "path";
@@ -9,89 +8,95 @@ import XLSX from "xlsx";
 import csvParser from "csv-parser";
 import QRCode from "qrcode";
 
-// Helper to download files from URLs or handle raw content
-const downloadFile = async (input, dest) => {
-    if (input && input.startsWith('http')) {
-        // If input is a URL, download the file
-        const writer = fs.createWriteStream(dest);
-        const response = await axios.get(input, { responseType: "stream" });
-        response.data.pipe(writer);
-        return new Promise((resolve, reject) => {
-            writer.on("finish", resolve);
-            writer.on("error", reject);
+// Helper: Download file
+const downloadFile = async (url, dest) => {
+    console.log(`Downloading file from ${url}`);
+    const writer = fs.createWriteStream(dest);
+    const response = await axios.get(url, { responseType: "stream" });
+    response.data.pipe(writer);
+    return new Promise((resolve, reject) => {
+        writer.on("finish", () => {
+            console.log(`File downloaded to ${dest}`);
+            resolve();
         });
-    } else {
-        // If input is raw content (HTML), convert to PDF using Puppeteer
-        if (input && input.startsWith('<html>')) {
-            console.log("Converting HTML to PDF...");
-            await convertHtmlToPdf(input, dest);
-        } else {
-            console.log("No valid content provided.");
+        writer.on("error", (err) => reject(err));
+    });
+};
+
+// Helper: Extract column names from file
+const extractColumnNames = async (filePath, type) => {
+    console.log(`Extracting column names from file: ${filePath}`);
+    if (type === "csv") {
+        return new Promise((resolve, reject) => {
+            fs.createReadStream(filePath)
+                .pipe(csvParser())
+                .on("headers", (headers) => {
+                    console.log("Column names extracted (CSV):", headers);
+                    resolve(headers);
+                })
+                .on("error", (err) => reject(err));
+        });
+    } else if (type === "xlsx") {
+        try {
+            const workbook = XLSX.readFile(filePath);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const columnNames = XLSX.utils.sheet_to_json(sheet, { header: 1 })[0];
+            console.log("Column names extracted (XLSX):", columnNames);
+            return columnNames;
+        } catch (err) {
+            console.error("Error extracting column names (XLSX):", err);
+            throw err;
         }
+    } else {
+        throw new Error("Unsupported file type for column extraction");
     }
 };
 
-// Function to convert HTML to PDF using Puppeteer
-const convertHtmlToPdf = async (htmlContent, outputPath) => {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.setContent(htmlContent);
-    await page.pdf({ path: outputPath, format: 'A4' });
-    await browser.close();
-    console.log(`Converted HTML to PDF: ${outputPath}`);
-};
-
-// Function to parse files (CSV or XLSX)
+// Helper: Parse file data
 const parseFile = async (filePath, type) => {
-    const data = [];
-
-    // console.log('Parsing file:', filePath, 'with type:', type);
-
+    console.log(`Parsing file data: ${filePath}`);
     if (type === "csv") {
-        // Handle CSV files
+        const data = [];
         return new Promise((resolve, reject) => {
             fs.createReadStream(filePath)
                 .pipe(csvParser())
                 .on("data", (row) => data.push(row))
                 .on("end", () => {
-                    // console.log("CSV parsing completed:", data);
+                    console.log("File data parsed (CSV):", data);
                     resolve(data);
                 })
-                .on("error", (error) => {
-                    console.error("Error parsing CSV:", error);
-                    reject(error);
-                });
+                .on("error", (err) => reject(err));
         });
-    } else if (type === "xlsx" || type === "vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-        // Handle XLSX files and its MIME type
+    } else {
         try {
-            if (!fs.existsSync(filePath)) {
-                console.error("File does not exist:", filePath);
-                return [];
-            }
-
-            const workbook = XLSX.readFile(filePath); // Read the XLSX file
-            const sheet = workbook.Sheets[workbook.SheetNames[0]]; // Get the first sheet
-            const jsonData = XLSX.utils.sheet_to_json(sheet); // Convert sheet to JSON
-
-            // console.log("XLSX parsing completed:", jsonData);
-            return jsonData;
-        } catch (error) {
-            console.error("Error parsing XLSX file:", error);
+            const workbook = XLSX.readFile(filePath);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const data = XLSX.utils.sheet_to_json(sheet);
+            console.log("File data parsed (XLSX):", data);
+            return data;
+        } catch (err) {
+            console.error("Error parsing XLSX file:", err);
             return [];
         }
     }
-
-    console.error("Unsupported file type:", type);
-    return data; // Return an empty array if type is unsupported
 };
 
-// Function to generate certificates
+// Helper: Convert HTML to PDF
+const convertHtmlToPdf = async (htmlPath, pdfPath) => {
+    console.log(`Converting HTML to PDF: ${htmlPath} -> ${pdfPath}`);
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(`file://${path.resolve(htmlPath)}`, { waitUntil: "load" });
+    await page.pdf({ path: pdfPath, printBackground: true });
+    await browser.close();
+    console.log(`PDF generated at ${pdfPath}`);
+};
+
+// Generate certificates
 const generateCertificates = async (req, res) => {
     try {
-        const { fileId, templateId, fieldMapping } = req.body;
+        const { fileId, templateId } = req.body;
 
-        // Fetch file and template
         const file = await File.findById(fileId);
         const template = await CertificateTemplate.findById(templateId);
 
@@ -99,102 +104,65 @@ const generateCertificates = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid file or template ID" });
         }
 
-        // Define file and template paths
         const filePath = `./public/genCertificate/${file.fileName}`;
-        const templatePath = `./public/genCertificate/${template.name}`;
+        const templateHtml = template.htmlContent;
+        const placeholders = template.placeholders;
 
-        // Download file if it's a URL
         await downloadFile(file.secure_url, filePath);
-        console.log(`File has been downloaded to ${filePath}`);
 
-        // Download template (convert if HTML or use as PDF)
-        await downloadFile(template.htmlContent, templatePath);
-        console.log(`Template has been downloaded to ${templatePath}`);
-
-        // Parse the file (CSV, XLSX, etc.)
+        const columnNames = await extractColumnNames(filePath, file.type);
         const fileData = await parseFile(filePath, file.type);
-        if (fileData.length === 0) {
-            return res.status(400).json({ success: false, message: "No data found in the file" });
+
+        if (!columnNames || columnNames.length === 0 || fileData.length === 0) {
+            return res.status(400).json({ success: false, message: "File is empty or has no columns" });
         }
 
-        // Load PDF template
-        const existingPdfBytes = fs.readFileSync(templatePath);
-        const pdfDoc = await PDFDocument.load(existingPdfBytes);
+        const fieldMapping = {};
+        placeholders.forEach((placeholder) => {
+            const columnMatch = columnNames.find((col) => col.toLowerCase() === placeholder.toLowerCase());
+            if (columnMatch) {
+                fieldMapping[placeholder] = columnMatch;
+            } else {
+                fieldMapping[placeholder] = "N/A";
+            }
+        });
+
+        const htmlDir = "./public/htmlCertificates";
+        const pdfDir = "./public/certificates";
+        if (!fs.existsSync(htmlDir)) fs.mkdirSync(htmlDir, { recursive: true });
+        if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir, { recursive: true });
 
         const generatedFiles = [];
         for (const row of fileData) {
-            const pdf = await PDFDocument.load(existingPdfBytes);
-            const pages = pdf.getPages();
-            const page = pages[0];
+            let htmlContent = templateHtml;
 
-            // Insert dynamic data from the fieldMapping
-            Object.keys(fieldMapping).forEach((field) => {
-                const text = row[fieldMapping[field]] || "N/A";
-                page.drawText(text, { x: 50, y: 400, size: 12, color: rgb(0, 0, 0) });
+            placeholders.forEach((placeholder) => {
+                const value = row[fieldMapping[placeholder]] || "N/A";
+                htmlContent = htmlContent.replace(new RegExp(`{{${placeholder}}}`, "g"), value);
             });
 
-            // Add QR code to the certificate
-            const qrBytes = await QRCode.toBuffer(`https://verify.url/certificate/${row.id}`);
-            const qrImage = await pdf.embedPng(qrBytes);
-            page.drawImage(qrImage, { x: 450, y: 50, width: 100, height: 100 });
+            const qrCode = await QRCode.toDataURL(`https://verify.url/certificate/${row.id}`);
+            htmlContent = htmlContent.replace(/{{qrcode}}/g, `<img src="${qrCode}" alt="QR Code" />`);
 
-            // Save the generated PDF file
-            const pdfBytes = await pdf.save();
-            const outputPath = `./certificates/${row[fieldMapping["name"]]}.pdf`;
-            fs.writeFileSync(outputPath, pdfBytes);
-            generatedFiles.push(outputPath);
+            const htmlFileName = `${htmlDir}/${row[fieldMapping["name"]] || "certificate"}.html`;
+            const pdfFileName = `${pdfDir}/${row[fieldMapping["name"]] || "certificate"}.pdf`;
+
+            fs.writeFileSync(htmlFileName, htmlContent, "utf-8");
+            console.log(`HTML certificate generated: ${htmlFileName}`);
+
+            await convertHtmlToPdf(htmlFileName, pdfFileName);
+            generatedFiles.push(pdfFileName);
         }
 
-        // Return success response with generated files
         res.status(200).json({
             success: true,
-            message: "Certificates generated successfully.",
+            message: "Certificates generated successfully",
             files: generatedFiles,
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Error generating certificates.", error });
+        console.error("Error generating certificates:", error);
+        res.status(500).json({ success: false, message: "Error generating certificates", error });
     }
 };
 
-// Function to compress certificates into a ZIP file
-const downloadCertificatesAsZip = async (req, res) => {
-    try {
-        const { genCertificateId } = req.params;
-
-        const genCert = await GenCertificate.findById(genCertificateId);
-        if (!genCert) {
-            return res.status(404).json({
-                success: false,
-                message: "Generated certificates not found.",
-            });
-        }
-
-        const zip = new AdmZip();
-        for (const recipient of genCert.recipients) {
-            const filePath = path.join(__dirname, `../output/${recipient.name}.pdf`);
-            zip.addLocalFile(filePath);
-        }
-
-        const zipPath = path.join(__dirname, "../output/certificates.zip");
-        zip.writeZip(zipPath);
-
-        res.download(zipPath, "certificates.zip", (err) => {
-            if (err) {
-                console.error(err);
-                fs.unlinkSync(zipPath);
-            } else {
-                fs.unlinkSync(zipPath); // Clean up after download
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Error downloading certificates.",
-            error,
-        });
-    }
-};
-
-export { generateCertificates, downloadCertificatesAsZip };
+export { generateCertificates };
