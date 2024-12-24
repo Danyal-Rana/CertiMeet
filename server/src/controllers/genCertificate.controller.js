@@ -36,7 +36,7 @@ const extractColumnNames = async (filePath, type) => {
                 })
                 .on("error", (err) => reject(err));
         });
-    } else if (type === "xlsx") {
+    } else if (type === "xlsx" || type === "xls" || type === "xlsm" || type === "xlsb" || type === "vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
         try {
             const workbook = XLSX.readFile(filePath);
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
