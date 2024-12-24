@@ -82,7 +82,7 @@ const generateCertificates = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid file or template ID" });
         }
 
-        const filePath = `./public/genCertificate/${file.fileName}`;
+        const filePath = `./public/files/${file.fileName}`;
         const templateHtml = template.htmlContent;
         const placeholders = template.placeholders;
 
@@ -97,12 +97,20 @@ const generateCertificates = async (req, res) => {
 
         const fieldMapping = {};
         placeholders.forEach((placeholder) => {
-            const columnMatch = columnNames.find((col) => col.toLowerCase() === placeholder.toLowerCase());
+            // Remove '{{' and '}}' from the placeholder
+            const cleanPlaceholder = placeholder.replace(/{{\s*|\s*}}/g, "").toLowerCase();
+
+            // Find a matching column in the file
+            const columnMatch = columnNames.find((col) => col.toLowerCase() === cleanPlaceholder);
+            
+            console.log(`For placeholder "${placeholder}" in HTML content, found column "${columnMatch}" in file.`);
+
             fieldMapping[placeholder] = columnMatch || placeholder;
         });
 
+
         const htmlDir = "./public/htmlCertificates";
-        const pdfDir = "./public/certificates";
+        const pdfDir = "./public/pdfCertificates";
         if (!fs.existsSync(htmlDir)) fs.mkdirSync(htmlDir, { recursive: true });
         if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir, { recursive: true });
 
