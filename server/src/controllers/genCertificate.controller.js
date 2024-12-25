@@ -143,9 +143,16 @@ const generateCertificates = async (req, res) => {
             // const qrCode = await QRCode.toDataURL(`https://verify.url/certificate/${row.id}`);
             // htmlContent = htmlContent.replace(/{{qrcode}}/g, `<img src="${qrCode}" alt="QR Code" />`);
 
-            const nameField = row[fieldMapping["name"]] || `certificate_${Date.now()}`;
-            const htmlFileName = `${htmlDir}/${nameField}.html`;
-            const pdfFileName = `${pdfDir}/${nameField}.pdf`;
+            // const nameField = row[fieldMapping["name"]] || `certificate_${Date.now()}`;
+            // const htmlFileName = `${htmlDir}/${nameField}.html`;
+            // const pdfFileName = `${pdfDir}/${nameField}.pdf`;
+
+            // Extract email address and sanitize it for the filename
+            const emailField = row[fieldMapping["email"]] || `email_${Date.now()}`;
+            const sanitizedEmail = emailField.replace(/[^a-zA-Z0-9]/g, "_");
+
+            const htmlFileName = `${htmlDir}/${sanitizedEmail}.html`;
+            const pdfFileName = `${pdfDir}/${sanitizedEmail}.pdf`;
 
             fs.writeFileSync(htmlFileName, htmlContent, "utf-8");
             // console.log(`HTML certificate generated: ${htmlFileName}`);
