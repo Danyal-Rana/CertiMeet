@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { generateCertificates, downloadAllCertificates, sendCertificatesToEmails } from "../controllers/genCertificate.controller.js";
+import { generateCertificates, downloadAllCertificates, sendCertificatesToEmails, deleteHtmlCertificates, deletePdfCertificates } from "../controllers/genCertificate.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -14,5 +14,11 @@ router.route("/download").get(verifyJWT, downloadAllCertificates);
 
 // router for sending emails to the participants
 router.route("/send-certificates").post(verifyJWT, sendCertificatesToEmails);
+
+// router for deleting html certificates
+router.route("/delete-html").delete(verifyJWT, deleteHtmlCertificates);
+
+// router for deleting pdf certificates
+router.route("/delete-pdf").delete(verifyJWT, deletePdfCertificates);
 
 export default router;

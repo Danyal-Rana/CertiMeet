@@ -143,32 +143,12 @@ const generateCertificates = async (req, res) => {
             // const qrCode = await QRCode.toDataURL(`https://verify.url/certificate/${row.id}`);
             // htmlContent = htmlContent.replace(/{{qrcode}}/g, `<img src="${qrCode}" alt="QR Code" />`);
 
-            // const nameField = row[fieldMapping["name"]] || `certificate_${Date.now()}`;
-            // const htmlFileName = `${htmlDir}/${nameField}.html`;
-            // const pdfFileName = `${pdfDir}/${nameField}.pdf`;
-
-            // Extract email address and sanitize it for the filename
-            // Extract the column mapped to "email"
-            const emailColumn = fieldMapping["email"];
-            if (!emailColumn) {
-                throw new Error("Email column is not mapped in the field mapping");
-            }
-
-            // Get the email value for the current row
-            const emailField = row[emailColumn];
-            if (!emailField) {
-                throw new Error("Email field is missing in the row data");
-            }
-
-            // Use the portion of the email address before '@' as the filename
-            const emailNamePart = emailField.split("@")[0];
-            const sanitizedEmailName = emailNamePart.replace(/[^a-zA-Z0-9]/g, "_");
-
-            const htmlFileName = `${htmlDir}/${sanitizedEmailName}.html`;
-            const pdfFileName = `${pdfDir}/${sanitizedEmailName}.pdf`;
-
-
-
+            // console.log(`Field mapping is: ${JSON.stringify(fieldMapping)}`);
+            const nameField = row[0] || `certificate_${Date.now()}`;
+            console.log(`Generating certificate for: ${nameField}`);
+            const htmlFileName = `${htmlDir}/${nameField}.html`;
+            const pdfFileName = `${pdfDir}/${nameField}.pdf`;
+            
             fs.writeFileSync(htmlFileName, htmlContent, "utf-8");
             // console.log(`HTML certificate generated: ${htmlFileName}`);
 
@@ -261,7 +241,7 @@ const sendCertificatesToEmails = async (req, res) => {
     try {
         // Fix the directory path to point to the correct 'public' folder
         const certificatesDir = path.join(__dirname, '../../public/pdfCertificates');
-        console.log('Certificates Directory:', certificatesDir);
+        // console.log('Certificates Directory:', certificatesDir);
 
         // Extract email data from the request body
         const emailData = req.body.emailData; // Format: [{ name: "John", email: "john@example.com", fileName: "john.pdf" }, ...]
@@ -306,7 +286,7 @@ const sendCertificatesToEmails = async (req, res) => {
 
             // Send email
             await transporter.sendMail(mailOptions);
-            console.log(`Certificate sent to: ${email}`);
+            // console.log(`Certificate sent to: ${email}`);
         }
 
         res.status(200).json({ message: 'All certificates sent successfully!' });
@@ -316,4 +296,62 @@ const sendCertificatesToEmails = async (req, res) => {
     }
 };
 
-export { generateCertificates, downloadAllCertificates, sendCertificatesToEmails };
+// Function to delete all files inside the htmlCertificates folder
+const deleteHtmlCertificates = async () => {
+    try {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const htmlDir = path.join(__dirname, '../../public/htmlCertificates');
+        // console.log("HTML Certificates Directory:", htmlDir);
+
+        // Check if the folder exists
+        if (fs.existsSync(htmlDir)) {
+            const files = fs.readdirSync(htmlDir);
+
+            // Delete each file in the folder
+            files.forEach((file) => {
+                const filePath = path.join(htmlDir, file);
+                if (fs.statSync(filePath).isFile()) {
+                    fs.unlinkSync(filePath); // Delete the file
+                    // console.log(`Deleted HTML certificate: ${file}`);
+                }
+            });
+
+            console.log("All HTML certificates deleted successfully.");
+        } else {
+            console.log("HTML certificates folder does not exist.");
+        }
+    } catch (error) {
+        console.error("Error deleting HTML certificates:", error);
+    }
+};
+
+const deletePdfCertificates = async () => {
+    try {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const pdfDir = path.join(__dirname, '../../public/pdfCertificates');
+
+        // Check if the folder exists
+        if (fs.existsSync(pdfDir)) {
+            const files = fs.readdirSync(pdfDir);
+
+            // Delete each file in the folder
+            files.forEach((file) => {
+                const filePath = path.join(pdfDir, file);
+                if (fs.statSync(filePath).isFile()) {
+                    fs.unlinkSync(filePath); // Delete the file
+                    // console.log(`Deleted PDF certificate: ${file}`);
+                }
+            });
+
+            console.log("All PDF certificates deleted successfully.");
+        } else {
+            console.log("PDF certificates folder does not exist.");
+        }
+    } catch (error) {
+        console.error("Error deleting PDF certificates:", error);
+    }
+};
+
+export { generateCertificates, downloadAllCertificates, sendCertificatesToEmails, deleteHtmlCertificates, deletePdfCertificates };
