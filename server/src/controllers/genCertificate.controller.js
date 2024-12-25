@@ -148,7 +148,14 @@ const generateCertificates = async (req, res) => {
             // const pdfFileName = `${pdfDir}/${nameField}.pdf`;
 
             // Extract email address and sanitize it for the filename
-            const emailField = row[fieldMapping["email"]];
+            // Extract the column mapped to "email"
+            const emailColumn = fieldMapping["{{email}}"];
+            if (!emailColumn) {
+                throw new Error("Email column is not mapped in the field mapping");
+            }
+
+            // Get the email value for the current row
+            const emailField = row[emailColumn];
             if (!emailField) {
                 throw new Error("Email field is missing in the row data");
             }
@@ -159,6 +166,7 @@ const generateCertificates = async (req, res) => {
 
             const htmlFileName = `${htmlDir}/${sanitizedEmailName}.html`;
             const pdfFileName = `${pdfDir}/${sanitizedEmailName}.pdf`;
+
 
 
             fs.writeFileSync(htmlFileName, htmlContent, "utf-8");
