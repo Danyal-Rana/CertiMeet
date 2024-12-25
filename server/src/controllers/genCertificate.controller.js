@@ -171,8 +171,9 @@ const downloadAllCertificates = async (req, res) => {
     const __dirname = path.dirname(__filename);
 
     try {
-        const certificatesDir = path.join(__dirname, '../public/pdfCertificates');
-        const zipDir = path.join(__dirname, '../public/zipFiles');
+        // Update the paths to point to the correct public folder in the server directory
+        const certificatesDir = path.join(__dirname, '../../public/pdfCertificates');
+        const zipDir = path.join(__dirname, '../../public/zipFiles');
         const zipFilePath = path.join(zipDir, 'certificates.zip');
 
         console.log('Certificates Directory:', certificatesDir);
@@ -196,12 +197,14 @@ const downloadAllCertificates = async (req, res) => {
         output.on('close', () => {
             console.log(`Zip file created: ${zipFilePath} (${archive.pointer()} bytes)`);
 
-            // Temporary: Disable download for debugging
-            if (fs.existsSync(zipFilePath)) {
-                console.log('Zip file successfully created and exists:', zipFilePath);
-            } else {
-                console.error('Zip file not created:', zipFilePath);
-            }
+            // Serve the zip file for download
+            res.download(zipFilePath, 'certificates.zip', (err) => {
+                if (err) {
+                    console.error('Error in download:', err);
+                } else {
+                    console.log('Certificates successfully downloaded.');
+                }
+            });
         });
 
         archive.on('error', (err) => {
@@ -212,7 +215,12 @@ const downloadAllCertificates = async (req, res) => {
         archive.pipe(output);
 
         // Add all files in the certificates directory to the zip
-        archive.directory(certificatesDir, false);
+        if (fs.existsSync(certificatesDir)) {
+            archive.directory(certificatesDir, false);
+        } else {
+            console.error('Certificates directory does not exist:', certificatesDir);
+            throw new Error('Certificates directory not found.');
+        }
 
         // Finalize the archive
         await archive.finalize();
