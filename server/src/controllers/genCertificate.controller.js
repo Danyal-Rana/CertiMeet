@@ -149,7 +149,7 @@ const generateCertificates = async (req, res) => {
 
             // Extract email address and sanitize it for the filename
             // Extract the column mapped to "email"
-            const emailColumn = fieldMapping["{{email}}"];
+            const emailColumn = fieldMapping["email"];
             if (!emailColumn) {
                 throw new Error("Email column is not mapped in the field mapping");
             }
