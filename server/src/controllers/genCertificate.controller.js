@@ -165,49 +165,46 @@ const generateCertificates = async (req, res) => {
     }
 };
 
-
-const downloadCertificates = (req, res) => {
+const downloadAllCertificates = async (req, res) => {
     try {
-        const certificatesDir = path.join(__dirname, "../public/pdfCertificates"); // Path to the folder containing PDFs
-        const zipFilePath = path.join(__dirname, "../public/certificates.zip"); // Path to save the ZIP file
+        const certificatesDir = path.join(__dirname, '../public/pdfCertificates');
+        const zipFilePath = path.join(__dirname, '../public/zipFiles/certificates.zip');
 
-        // Create a ZIP file
+        // Step 1: Create a zip file
         const output = fs.createWriteStream(zipFilePath);
-        const archive = archiver("zip", { zlib: { level: 9 } }); // Set compression level
+        const archive = archiver('zip', { zlib: { level: 9 } });
 
-        output.on("close", () => {
-            console.log(`ZIP file created: ${archive.pointer()} total bytes`);
-            // Send the ZIP file for download
-            res.download(zipFilePath, "certificates.zip", (err) => {
-                if (err) throw err;
+        output.on('close', () => {
+            console.log(`Zip file created: ${zipFilePath} (${archive.pointer()} bytes)`);
 
-                // Clean up the ZIP file after download
-                fs.unlinkSync(zipFilePath);
+            // Step 2: Serve the zip file for download
+            res.download(zipFilePath, 'certificates.zip', (err) => {
+                if (err) {
+                    console.error('Error in download:', err);
+                } else {
+                    // Step 3: Delete the zip file and original certificates
+                    fs.unlinkSync(zipFilePath);
+                    fs.rmSync(certificatesDir, { recursive: true, force: true });
+                    console.log('Certificates and zip file deleted.');
+                }
             });
         });
 
-        archive.on("error", (err) => {
+        archive.on('error', (err) => {
             throw err;
         });
 
-        // Pipe archive data to the file
         archive.pipe(output);
 
-        // Append all PDF files from the folder to the archive
-        fs.readdirSync(certificatesDir).forEach((file) => {
-            const filePath = path.join(certificatesDir, file);
-            if (file.endsWith(".pdf")) {
-                archive.file(filePath, { name: file });
-            }
-        });
+        // Add all files in the certificates directory to the zip
+        archive.directory(certificatesDir, false);
 
         // Finalize the archive
-        archive.finalize();
+        await archive.finalize();
     } catch (error) {
-        console.error("Error downloading certificates:", error);
-        res.status(500).json({ message: "Failed to download certificates.", error });
+        console.error('Error during zipping and downloading:', error);
+        res.status(500).json({ error: 'Failed to download certificates.' });
     }
 };
 
-
-export { generateCertificates, downloadCertificates };
+export { generateCertificates, downloadAllCertificates };
