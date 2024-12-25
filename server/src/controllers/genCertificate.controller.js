@@ -8,6 +8,7 @@ import XLSX from "xlsx";
 import csvParser from "csv-parser";
 import QRCode from "qrcode";
 import archiver from "archiver";
+import { fileURLToPath } from 'url';
 
 // Helper: Download file
 const downloadFile = async (url, dest) => {
@@ -166,31 +167,45 @@ const generateCertificates = async (req, res) => {
 };
 
 const downloadAllCertificates = async (req, res) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
     try {
         const certificatesDir = path.join(__dirname, '../public/pdfCertificates');
-        const zipFilePath = path.join(__dirname, '../public/zipFiles/certificates.zip');
+        const zipDir = path.join(__dirname, '../public/zipFiles');
+        const zipFilePath = path.join(zipDir, 'certificates.zip');
+
+        console.log('Certificates Directory:', certificatesDir);
+        console.log('Zip Directory:', zipDir);
+        console.log('Zip File Path:', zipFilePath);
+
+        // Ensure the zipFiles directory exists
+        if (!fs.existsSync(zipDir)) {
+            fs.mkdirSync(zipDir, { recursive: true });
+            console.log('Zip directory created.');
+        }
 
         // Step 1: Create a zip file
         const output = fs.createWriteStream(zipFilePath);
         const archive = archiver('zip', { zlib: { level: 9 } });
 
+        output.on('open', () => {
+            console.log('WriteStream successfully opened for:', zipFilePath);
+        });
+
         output.on('close', () => {
             console.log(`Zip file created: ${zipFilePath} (${archive.pointer()} bytes)`);
 
-            // Step 2: Serve the zip file for download
-            res.download(zipFilePath, 'certificates.zip', (err) => {
-                if (err) {
-                    console.error('Error in download:', err);
-                } else {
-                    // Step 3: Delete the zip file and original certificates
-                    fs.unlinkSync(zipFilePath);
-                    fs.rmSync(certificatesDir, { recursive: true, force: true });
-                    console.log('Certificates and zip file deleted.');
-                }
-            });
+            // Temporary: Disable download for debugging
+            if (fs.existsSync(zipFilePath)) {
+                console.log('Zip file successfully created and exists:', zipFilePath);
+            } else {
+                console.error('Zip file not created:', zipFilePath);
+            }
         });
 
         archive.on('error', (err) => {
+            console.error('Error in archiving process:', err);
             throw err;
         });
 
