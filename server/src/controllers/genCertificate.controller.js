@@ -9,6 +9,7 @@ import csvParser from "csv-parser";
 import QRCode from "qrcode";
 import archiver from "archiver";
 import { fileURLToPath } from 'url';
+import nodemailer from "nodemailer";
 
 // Helper: Download file
 const downloadFile = async (url, dest) => {
@@ -166,6 +167,7 @@ const generateCertificates = async (req, res) => {
     }
 };
 
+// downloading certificates as ZIP
 const downloadAllCertificates = async (req, res) => {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
@@ -230,4 +232,66 @@ const downloadAllCertificates = async (req, res) => {
     }
 };
 
-export { generateCertificates, downloadAllCertificates };
+const sendCertificatesToEmails = async (req, res) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    try {
+        // Directory where certificates are stored
+        const certificatesDir = path.join(__dirname, '../public/pdfCertificates');
+        console.log('Certificates Directory:', certificatesDir);
+
+        // Extract email data from the request body
+        const emailData = req.body.emailData; // Format: [{ name: "John", email: "john@example.com", fileName: "john.pdf" }, ...]
+
+        if (!emailData || emailData.length === 0) {
+            return res.status(400).json({ error: 'No email data provided.' });
+        }
+
+        // Configure Nodemailer Transporter
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail', // You can use other services like Outlook, Yahoo, etc.
+            auth: {
+                user: process.env.EMAIL_USER, // Email from .env file
+                pass: process.env.EMAIL_PASS  // Password or app-specific password from .env file
+            }
+        });
+
+        // Loop through email data and send certificates
+        for (const entry of emailData) {
+            const { name, email, fileName } = entry;
+            const filePath = path.join(certificatesDir, fileName);
+
+            // Check if the file exists
+            if (!fs.existsSync(filePath)) {
+                console.error(`Certificate file not found: ${filePath}`);
+                continue;
+            }
+
+            // Email options
+            const mailOptions = {
+                from: `"CertiMeet" <${process.env.EMAIL_USER}>`, // Sender address
+                to: email, // Recipient address
+                subject: `Your Certificate, ${name}`, // Subject line
+                text: `Dear ${name},\n\nPlease find your certificate attached.\n\nBest regards,\nDanyal Rana`,
+                attachments: [
+                    {
+                        filename: fileName,
+                        path: filePath // Path to the certificate
+                    }
+                ]
+            };
+
+            // Send email
+            await transporter.sendMail(mailOptions);
+            console.log(`Certificate sent to: ${email}`);
+        }
+
+        res.status(200).json({ message: 'All certificates sent successfully!' });
+    } catch (error) {
+        console.error('Error sending certificates:', error);
+        res.status(500).json({ error: 'Failed to send certificates.' });
+    }
+};
+
+export { generateCertificates, downloadAllCertificates, sendCertificatesToEmails };
