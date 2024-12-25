@@ -237,8 +237,8 @@ const sendCertificatesToEmails = async (req, res) => {
     const __dirname = path.dirname(__filename);
 
     try {
-        // Directory where certificates are stored
-        const certificatesDir = path.join(__dirname, '../public/pdfCertificates');
+        // Fix the directory path to point to the correct 'public' folder
+        const certificatesDir = path.join(__dirname, '../../public/pdfCertificates');
         console.log('Certificates Directory:', certificatesDir);
 
         // Extract email data from the request body
@@ -273,7 +273,7 @@ const sendCertificatesToEmails = async (req, res) => {
                 from: `"CertiMeet" <${process.env.EMAIL_USER}>`, // Sender address
                 to: email, // Recipient address
                 subject: `Your Certificate, ${name}`, // Subject line
-                text: `Dear ${name},\n\nPlease find your certificate attached.\n\nBest regards,\nDanyal Rana`,
+                text: `Dear ${name},\n\nPlease find your certificate attached.\n\nBest regards,\nCertiMeet Team`,
                 attachments: [
                     {
                         filename: fileName,
