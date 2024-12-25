@@ -129,13 +129,13 @@ const generateCertificates = async (req, res) => {
                 const cleanPlaceholder = placeholder.replace(/{{\s*|\s*}}/g, ""); // Clean "{{ }}" syntax
                 const mappedColumn = fieldMapping[`{{${cleanPlaceholder}}}`]; // Ensure cleaned mapping is used
                 const value = row[mappedColumn] || "N/A"; // Fetch the value from row using mapped column
-            
+
                 // console.log(`Replacing placeholder "${placeholder}" with value "${value}"`);
                 // console.log(`Mapping: placeholder -> column -> value | ${placeholder} -> ${mappedColumn} -> ${value}`);
-            
+
                 // Replace placeholder in the HTML content
                 htmlContent = htmlContent.replace(new RegExp(`{{\\s*${cleanPlaceholder}\\s*}}`, "g"), value);
-            });            
+            });
 
 
 
@@ -148,11 +148,18 @@ const generateCertificates = async (req, res) => {
             // const pdfFileName = `${pdfDir}/${nameField}.pdf`;
 
             // Extract email address and sanitize it for the filename
-            const emailField = row[fieldMapping["email"]] || `email_${Date.now()}`;
-            const sanitizedEmail = emailField.replace(/[^a-zA-Z0-9]/g, "_");
+            const emailField = row[fieldMapping["email"]];
+            if (!emailField) {
+                throw new Error("Email field is missing in the row data");
+            }
 
-            const htmlFileName = `${htmlDir}/${sanitizedEmail}.html`;
-            const pdfFileName = `${pdfDir}/${sanitizedEmail}.pdf`;
+            // Use the portion of the email address before '@' as the filename
+            const emailNamePart = emailField.split("@")[0];
+            const sanitizedEmailName = emailNamePart.replace(/[^a-zA-Z0-9]/g, "_");
+
+            const htmlFileName = `${htmlDir}/${sanitizedEmailName}.html`;
+            const pdfFileName = `${pdfDir}/${sanitizedEmailName}.pdf`;
+
 
             fs.writeFileSync(htmlFileName, htmlContent, "utf-8");
             // console.log(`HTML certificate generated: ${htmlFileName}`);
