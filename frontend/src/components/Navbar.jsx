@@ -32,7 +32,7 @@ const Navbar = () => {
 
                     {/* Sign-In Button on the Right */}
                     <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                        <Link to="/login" className="bg-black text-black !rounded-button px-4 py-2 text-sm font-medium hover:bg-black/90">
+                        <Link to="/login" className="bg-black text-white !rounded-button px-4 py-2 text-sm font-medium hover:bg-black/90">
                             Sign In
                         </Link>
                     </div>
