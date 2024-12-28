@@ -24,14 +24,16 @@ const Footer = () => {
                         </div>
                     </div>
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Contact</h3>
-                        <div className="mt-4">
-                            <p className="text-base text-gray-300">Computer Science Department</p>
-                            <p className="text-base text-gray-300">Comsats University</p>
-                            <p className="text-base text-gray-300">Park Road, Islamabad</p>
-                            <p className="text-base text-gray-300">aka.mdrana@gmail.com</p>
-                        </div>
-                    </div>
+    <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Contact</h3>
+    <ul className="mt-4 list-disc list-inside text-base text-gray-300">
+        <li>Computer Science Department</li>
+        <li>Comsats University</li>
+        <li>Park Road, Islamabad</li>
+        <li>aka.mdrana@gmail.com</li>
+        <li>+92-305-216-XXXX</li>
+    </ul>
+</div>
+
                     <div>
                         <div className="h-64 w-full rounded-lg overflow-hidden">
                             <iframe
