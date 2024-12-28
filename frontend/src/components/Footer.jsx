@@ -6,7 +6,7 @@ const Footer = () => {
                     <div>
                         <img className="h-8" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2B9LswCEh3jElEIiDsU4C60RTU3Chlv-h2A&s" alt="CertiMeet" />
                         <p className="mt-4 text-gray-300 text-base">
-                        CertiMeet simplifies your workflow by seamlessly combining certificate generation and meeting scheduling into a single, user-friendly platform. Whether you’re organizing events, managing teams, or handling certifications, CertiMeet ensures efficiency and professionalism at every step.
+                            CertiMeet simplifies your workflow by seamlessly combining certificate generation and meeting scheduling into a single, user-friendly platform. Whether you’re organizing events, managing teams, or handling certifications, CertiMeet ensures efficiency and professionalism at every step.
                         </p>
                         <div className="mt-4 flex space-x-6">
                             <a href="#" className="text-gray-400 hover:text-gray-300">
@@ -24,15 +24,15 @@ const Footer = () => {
                         </div>
                     </div>
                     <div>
-    <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Contact</h3>
-    <ul className="mt-4 list-disc list-inside text-base text-gray-300">
-        <li>Computer Science Department</li>
-        <li>Comsats University</li>
-        <li>Park Road, Islamabad</li>
-        <li>aka.mdrana@gmail.com</li>
-        <li>+92-305-216-XXXX</li>
-    </ul>
-</div>
+                        <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Contact</h3>
+                        <ul className="mt-4 list-disc list-inside text-base text-gray-300">
+                            <li>Computer Science Department</li>
+                            <li>Comsats University</li>
+                            <li>Park Road, Islamabad</li>
+                            <li>aka.mdrana@gmail.com</li>
+                            <li>+92-305-216-XXXX</li>
+                        </ul>
+                    </div>
 
                     <div>
                         <div className="h-64 w-full rounded-lg overflow-hidden">
