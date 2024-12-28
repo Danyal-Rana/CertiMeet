@@ -6,11 +6,11 @@ import { faCertificate, faCalendarCheck, faCloud } from '@fortawesome/free-solid
 const LandingPage = () => {
     return (
         <div>
-            
+
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-white">
+            <div className="relative overflow-hidden bg-gray-50">
                 <div className="max-w-8xl mx-auto">
-                    <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
+                    <div className="relative z-10 pb-8 bg-gray-50 sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
                         <div className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                             <div className="flex items-center justify-between sm:flex-col lg:flex-row">
                                 {/* Left Side Content */}
@@ -95,6 +95,53 @@ const LandingPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* How it Works Section */}
+            <div className="py-16 bg-gray-50 overflow-hidden">
+                <div className="max-w-8xl mx-auto px-4 space-y-8 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <h2 className="text-base text-custom font-semibold tracking-wide uppercase">How It Works</h2>
+                        <p className="mt-2 text-3xl leading-8 font-bold tracking-tight text-gray-900 sm:text-4xl">
+                            Simple steps to get started
+                        </p>
+                    </div>
+
+                    <div className="relative">
+                        <div className="relative md:grid md:grid-cols-2 md:gap-8">
+                            <div className="md:col-span-1">
+                                <h3 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl">Certificate Generation</h3>
+                                <p className="mt-3 text-lg text-gray-500">
+                                    Create professional certificates in just a few clicks. Upload your template, add recipient details, and generate certificates in bulk.
+                                </p>
+                                <div className="mt-10">
+                                    <a href="#" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-custom hover:bg-custom/90">Try Certificate Generator</a>
+                                </div>
+                            </div>
+                            <div className="mt-10 relative md:mt-0">
+                                <img className="w-full rounded-xl shadow-xl ring-1 ring-black ring-opacity-5" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZQNgU_vjekDY_APdAOH3P24g8nBZlVrmvmQ&s" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="relative mt-12">
+                        <div className="relative md:grid md:grid-cols-2 md:gap-8">
+                            <div className="md:col-span-1 order-2 md:order-1">
+                                <img className="w-full rounded-xl shadow-xl ring-1 ring-black ring-opacity-5" src="https://cdn.prod.website-files.com/665f17d0fb4bfc1e811460d3/665f17d0fb4bfc1e8114681c_7.jpg" alt="Meeting scheduling interface" />
+                            </div>
+                            <div className="mt-10 relative md:mt-0 order-1 md:order-2">
+                                <h3 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl">Meeting Management</h3>
+                                <p className="mt-3 text-lg text-gray-500">
+                                    Schedule meetings efficiently with our intuitive calendar interface. Send invitations, manage attendees, and track responses all in one place.
+                                </p>
+                                <div className="mt-10">
+                                    <a href="#" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-custom hover:bg-custom/90">Schedule a Meeting</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             {/* CTA Section */}
             <div className="bg-white">
