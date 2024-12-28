@@ -1,31 +1,44 @@
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCertificate, faCalendarCheck, faCloud } from '@fortawesome/free-solid-svg-icons';
+
 
 const LandingPage = () => {
     return (
         <div>
+            
+            {/* Hero Section */}
             <div className="relative overflow-hidden bg-white">
                 <div className="max-w-8xl mx-auto">
                     <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
                         <div className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-                            <div className="sm:text-center lg:text-left">
-                                <h1 className="text-4xl tracking-tight font-bold text-gray-900 sm:text-5xl md:text-6xl">
-                                    <span className="block">Streamline Your</span>
-                                    <span className="block text-black">Certificate & Meeting Management</span>
-                                </h1>
-                                <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                                    Automate certificate generation and simplify meeting scheduling with CertiMeet. Save time and increase productivity with our all-in-one solution.
-                                </p>
-                                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                                    <div className="rounded-md shadow">
-                                        <Link to="/signup" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium !rounded-button text-white bg-black hover:bg-black/90 md:py-4 md:text-lg md:px-10">
-                                            Get Started
-                                        </Link>
+                            <div className="flex items-center justify-between sm:flex-col lg:flex-row">
+                                {/* Left Side Content */}
+                                <div className="lg:w-1/2 sm:text-center lg:text-left">
+                                    <h1 className="text-4xl tracking-tight font-bold text-gray-900 sm:text-5xl md:text-6xl">
+                                        <span className="block">Streamline Your</span>
+                                        <span className="block text-black">Certificate & Meeting Management</span>
+                                    </h1>
+                                    <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                                        Automate certificate generation and simplify meeting scheduling with CertiMeet. Save time and increase productivity with our all-in-one solution.
+                                    </p>
+                                    <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                                        <div className="rounded-md shadow">
+                                            <Link to="/signup" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium !rounded-button text-white bg-black hover:bg-black/90 md:py-4 md:text-lg md:px-10">
+                                                Get Started
+                                            </Link>
+                                        </div>
+                                        <div className="mt-3 sm:mt-0 sm:ml-3">
+                                            <Link to="/about" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium !rounded-button text-black bg-black/10 hover:bg-black/20 md:py-4 md:text-lg md:px-10">
+                                                Learn More
+                                            </Link>
+                                        </div>
                                     </div>
-                                    <div className="mt-3 sm:mt-0 sm:ml-3">
-                                        <Link to="/about" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium !rounded-button text-black bg-black/10 hover:bg-black/20 md:py-4 md:text-lg md:px-10">
-                                            Learn More
-                                        </Link>
-                                    </div>
+                                </div>
+
+                                {/* Right Side Image */}
+                                <div className="lg:w-1/2 mt-10 lg:mt-0">
+                                    <img src="https://cdn.britannica.com/29/150929-050-547070A1/lion-Kenya-Masai-Mara-National-Reserve.jpg" alt="CertiMeet" className="w-full h-auto object-cover rounded-md shadow-md" />
                                 </div>
                             </div>
                         </div>
@@ -48,7 +61,7 @@ const LandingPage = () => {
                             {/* Feature 1 */}
                             <div className="relative">
                                 <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-black text-white">
-                                    <i className="fas fa-certificate text-xl"></i>
+                                    <FontAwesomeIcon icon={faCertificate} className="text-xl" />
                                 </div>
                                 <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Certificate Generation</p>
                                 <p className="mt-2 ml-16 text-base text-gray-500">
@@ -59,7 +72,7 @@ const LandingPage = () => {
                             {/* Feature 2 */}
                             <div className="relative">
                                 <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-black text-white">
-                                    <i className="fas fa-calendar-check text-xl"></i>
+                                    <FontAwesomeIcon icon={faCalendarCheck} className="text-xl" />
                                 </div>
                                 <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Meeting Management</p>
                                 <p className="mt-2 ml-16 text-base text-gray-500">
@@ -70,7 +83,7 @@ const LandingPage = () => {
                             {/* Feature 3 */}
                             <div className="relative">
                                 <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-black text-white">
-                                    <i className="fas fa-cloud text-xl"></i>
+                                    <FontAwesomeIcon icon={faCloud} className="text-xl" />
                                 </div>
                                 <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Cloud Storage</p>
                                 <p className="mt-2 ml-16 text-base text-gray-500">
@@ -78,6 +91,7 @@ const LandingPage = () => {
                                 </p>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
