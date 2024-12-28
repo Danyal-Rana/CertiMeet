@@ -37,7 +37,7 @@ const LoginPage = () => {
                     </button>
                 </form>
                 <p className="mt-4 text-center">
-                    Don't have an account? <Link to="/signup" className="text-custom font-bold">Sign up</Link>
+                    Don't have an account? <Link to="/signup" className="text-black font-bold">Sign up</Link>
                 </p>
             </div>
         </div>

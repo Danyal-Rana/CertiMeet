@@ -6,7 +6,7 @@ const DashboardPage = () => {
                     <div className="p-6 bg-white rounded-lg shadow">
                         <h3 className="text-xl font-semibold mb-4">Files</h3>
                         <div className="space-y-4">
-                            <button className="bg-custom text-white px-4 py-2 rounded-md">
+                            <button className="bg-black text-white px-4 py-2 rounded-md">
                                 Add New File
                             </button>
                             <div className="mt-4">
@@ -20,7 +20,7 @@ const DashboardPage = () => {
                     <div className="p-6 bg-white rounded-lg shadow">
                         <h3 className="text-xl font-semibold mb-4">Templates</h3>
                         <div className="space-y-4">
-                            <button className="bg-custom text-white px-4 py-2 rounded-md">
+                            <button className="bg-black text-white px-4 py-2 rounded-md">
                                 Add New Template
                             </button>
                             <div className="mt-4">

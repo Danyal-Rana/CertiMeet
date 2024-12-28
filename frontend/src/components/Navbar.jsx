@@ -16,7 +16,7 @@ const Navbar = () => {
 
                     {/* Centered Navigation Links */}
                     <div className="flex-1 flex justify-center sm:ml-6 sm:flex sm:space-x-8">
-                        <Link to="/" className="border-custom text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        <Link to="/" className="border-black text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Home
                         </Link>
                         <Link to="/certificate" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
@@ -32,7 +32,7 @@ const Navbar = () => {
 
                     {/* Sign-In Button on the Right */}
                     <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                        <Link to="/login" className="bg-custom text-black !rounded-button px-4 py-2 text-sm font-medium hover:bg-custom/90">
+                        <Link to="/login" className="bg-black text-black !rounded-button px-4 py-2 text-sm font-medium hover:bg-black/90">
                             Sign In
                         </Link>
                     </div>
@@ -66,7 +66,7 @@ const Navbar = () => {
                             <Link to="/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">
                                 Dashboard
                             </Link>
-                            <Link to="/login" className="block px-3 py-2 rounded-md text-base font-medium text-custom hover:bg-gray-100">
+                            <Link to="/login" className="block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-100">
                                 Sign In
                             </Link>
                         </div>

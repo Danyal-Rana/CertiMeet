@@ -45,7 +45,7 @@ const CertificatePage = () => {
                                 accept=".csv,.xlsx"
                                 onChange={handleFileChange}
                             />
-                            <a href="/add-file" className="text-custom hover:text-custom/80">
+                            <a href="/add-file" className="text-black hover:text-black/80">
                                 Add New File
                             </a>
                         </div>
@@ -62,7 +62,7 @@ const CertificatePage = () => {
                                 <option value="template1">Template 1</option>
                                 <option value="template2">Template 2</option>
                             </select>
-                            <a href="/add-template" className="text-custom hover:text-custom/80">
+                            <a href="/add-template" className="text-black hover:text-black/80">
                                 Add New Template
                             </a>
                         </div>
@@ -70,7 +70,7 @@ const CertificatePage = () => {
                 </div>
                 <div className="flex space-x-4">
                     <button
-                        className="bg-custom text-white px-6 py-2 rounded-md"
+                        className="bg-black text-white px-6 py-2 rounded-md"
                         onClick={handleGenerateCertificates}
                     >
                         Generate Certificates

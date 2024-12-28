@@ -10,19 +10,19 @@ const LandingPage = () => {
                             <div className="sm:text-center lg:text-left">
                                 <h1 className="text-4xl tracking-tight font-bold text-gray-900 sm:text-5xl md:text-6xl">
                                     <span className="block">Streamline Your</span>
-                                    <span className="block text-custom">Certificate & Meeting Management</span>
+                                    <span className="block text-black">Certificate & Meeting Management</span>
                                 </h1>
                                 <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                                     Automate certificate generation and simplify meeting scheduling with CertiMeet. Save time and increase productivity with our all-in-one solution.
                                 </p>
                                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                                     <div className="rounded-md shadow">
-                                        <Link to="/signup" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium !rounded-button text-white bg-custom hover:bg-custom/90 md:py-4 md:text-lg md:px-10">
+                                        <Link to="/signup" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium !rounded-button text-white bg-black hover:bg-black/90 md:py-4 md:text-lg md:px-10">
                                             Get Started
                                         </Link>
                                     </div>
                                     <div className="mt-3 sm:mt-0 sm:ml-3">
-                                        <Link to="/about" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium !rounded-button text-custom bg-custom/10 hover:bg-custom/20 md:py-4 md:text-lg md:px-10">
+                                        <Link to="/about" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium !rounded-button text-black bg-black/10 hover:bg-black/20 md:py-4 md:text-lg md:px-10">
                                             Learn More
                                         </Link>
                                     </div>
@@ -37,7 +37,7 @@ const LandingPage = () => {
             <div className="py-12 bg-white">
                 <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="lg:text-center">
-                        <h2 className="text-base text-custom font-semibold tracking-wide uppercase">Features</h2>
+                        <h2 className="text-base text-black font-semibold tracking-wide uppercase">Features</h2>
                         <p className="mt-2 text-3xl leading-8 font-bold tracking-tight text-gray-900 sm:text-4xl">
                             Everything you need to manage certificates and meetings
                         </p>
@@ -47,7 +47,7 @@ const LandingPage = () => {
                         <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
                             {/* Feature 1 */}
                             <div className="relative">
-                                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-custom text-white">
+                                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-black text-white">
                                     <i className="fas fa-certificate text-xl"></i>
                                 </div>
                                 <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Certificate Generation</p>
@@ -58,7 +58,7 @@ const LandingPage = () => {
 
                             {/* Feature 2 */}
                             <div className="relative">
-                                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-custom text-white">
+                                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-black text-white">
                                     <i className="fas fa-calendar-check text-xl"></i>
                                 </div>
                                 <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Meeting Management</p>
@@ -69,7 +69,7 @@ const LandingPage = () => {
 
                             {/* Feature 3 */}
                             <div className="relative">
-                                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-custom text-white">
+                                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-black text-white">
                                     <i className="fas fa-cloud text-xl"></i>
                                 </div>
                                 <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Cloud Storage</p>
@@ -95,12 +95,12 @@ const LandingPage = () => {
                             </p>
                             <div className="mt-8 sm:flex">
                                 <div className="rounded-md shadow">
-                                    <Link to="/signup" className="flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium !rounded-button text-white bg-custom hover:bg-custom/90">
+                                    <Link to="/signup" className="flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium !rounded-button text-white bg-black hover:bg-black/90">
                                         Start Free Trial
                                     </Link>
                                 </div>
                                 <div className="mt-3 sm:mt-0 sm:ml-3">
-                                    <Link to="/contact" className="flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium !rounded-button text-custom bg-custom/10 hover:bg-custom/20">
+                                    <Link to="/contact" className="flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium !rounded-button text-black bg-black/10 hover:bg-black/20">
                                         Contact Sales
                                     </Link>
                                 </div>
