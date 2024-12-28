@@ -4,7 +4,7 @@ const Footer = () => {
             <div className="max-w-8xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <div>
-                        <img className="h-8" src="/logo.png" alt="CertiMeet" />
+                        <img className="h-8" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2B9LswCEh3jElEIiDsU4C60RTU3Chlv-h2A&s" alt="CertiMeet" />
                         <p className="mt-4 text-gray-300 text-base">
                             Streamline your certificate generation and meeting management with CertiMeet.
                         </p>
@@ -47,8 +47,17 @@ const Footer = () => {
                 </div>
                 <div className="mt-8 border-t border-gray-700 pt-8">
                     <p className="text-base text-gray-400 text-center">
-                        © 2024 CertiMeet. All rights reserved. Powered by mdrana.com
+                        © 2024 CertiMeet. All rights reserved. Powered by{' '}
+                        <a
+                            href="https://mdrana.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gray-400 hover:text-white underline"
+                        >
+                            Danyal Rana
+                        </a>.
                     </p>
+
                 </div>
             </div>
         </footer>
