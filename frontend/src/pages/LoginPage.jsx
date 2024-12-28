@@ -32,7 +32,7 @@ const LoginPage = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <button type="submit" className="w-full bg-custom text-white py-2 rounded-md">
+                    <button type="submit" className="w-full bg-black text-white py-2 rounded-md">
                         Login
                     </button>
                 </form>
