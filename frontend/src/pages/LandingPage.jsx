@@ -167,19 +167,27 @@ const LandingPage = () => {
                             </div>
                         </div>
                         <div className="mt-8 grid grid-cols-2 gap-0.5 md:grid-cols-3 lg:mt-0 lg:grid-cols-2">
-                            <div className="col-span-1 flex justify-center py-8 px-8 bg-gray-50">
-                                <img className="max-h-12" src="/partner1-logo.png" alt="Partner 1" />
+                            {/* Partner 1 - Google */}
+                            <div className="col-span-1 flex justify-center items-center bg-gray-50">
+                                <img className="h-full w-full object-contain" src="https://download.logo.wine/logo/Google/Google-Logo.wine.png" alt="Google Logo" />
                             </div>
-                            <div className="col-span-1 flex justify-center py-8 px-8 bg-gray-50">
-                                <img className="max-h-12" src="/partner2-logo.png" alt="Partner 2" />
+
+                            {/* Partner 2 - Amazon */}
+                            <div className="col-span-1 flex justify-center items-center bg-gray-50">
+                                <img className="h-full w-full object-contain" src="https://w7.pngwing.com/pngs/732/34/png-transparent-logo-amazon-com-brand-flipkart-others-text-orange-logo.png" alt="Amazon Logo" />
                             </div>
-                            <div className="col-span-1 flex justify-center py-8 px-8 bg-gray-50">
-                                <img className="max-h-12" src="/partner3-logo.png" alt="Partner 3" />
+
+                            {/* Partner 3 - Microsoft */}
+                            <div className="col-span-1 flex justify-center items-center bg-gray-50">
+                                <img className="h-full w-full object-contain" src="https://w7.pngwing.com/pngs/124/600/png-transparent-microsoft-logo-microsoft-thumbnail.png" alt="Microsoft Logo" />
                             </div>
-                            <div className="col-span-1 flex justify-center py-8 px-8 bg-gray-50">
-                                <img className="max-h-12" src="/partner4-logo.png" alt="Partner 4" />
+
+                            {/* Partner 4 - Twitter */}
+                            <div className="col-span-1 flex justify-center items-center bg-gray-50">
+                                <img className="h-full w-full object-contain" src="https://1000logos.net/wp-content/uploads/2017/06/logo-Twitter.png" alt="Twitter Logo" />
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
