@@ -225,29 +225,53 @@ export const sendCertificatesToEmails = async (req, res) => {
             }
         });
 
+        const failedEmails = [];
+
         for (const recipient of genCertificate.recipients) {
             if (!recipient.email) continue;
 
-            const mailOptions = {
-                from: `"CertiMeet" <${process.env.EMAIL_USER}>`,
-                to: recipient.email,
-                subject: 'Your Certificate',
-                text: `Dear ${recipient.name},\n\nPlease find your certificate attached.\n\nBest regards,\nCertiMeet Team`,
-                attachments: [
-                    {
-                        filename: `${recipient.name}_certificate.pdf`,
-                        path: recipient.certificateUrl
-                    }
-                ]
-            };
+            try {
+                // Fetch the PDF content
+                const response = await fetch(recipient.certificateUrl);
 
-            await transporter.sendMail(mailOptions);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch certificate: ${response.statusText}`);
+                }
+
+                const pdfBuffer = await response.arrayBuffer();
+
+                const mailOptions = {
+                    from: `"CertiMeet" <${process.env.EMAIL_USER}>`,
+                    to: recipient.email,
+                    subject: 'Your Certificate',
+                    text: `Dear ${recipient.name},\n\nPlease find your certificate attached.\n\nBest regards,\nCertiMeet Team`,
+                    attachments: [
+                        {
+                            filename: `${recipient.name}_certificate.pdf`,
+                            content: Buffer.from(pdfBuffer)
+                        }
+                    ]
+                };
+
+                await transporter.sendMail(mailOptions);
+                console.log(`Certificate sent successfully to ${recipient.email}`);
+            } catch (error) {
+                console.error(`Failed to send certificate to ${recipient.email}:`, error);
+                failedEmails.push({ email: recipient.email, error: error.message });
+            }
         }
 
-        res.status(200).json({ message: 'All certificates sent successfully!' });
+        if (failedEmails.length > 0) {
+            res.status(207).json({
+                message: 'Some certificates could not be sent',
+                failedEmails: failedEmails
+            });
+        } else {
+            res.status(200).json({ message: 'All certificates sent successfully!' });
+        }
     } catch (error) {
         console.error('Error sending certificates:', error);
-        res.status(500).json({ error: 'Failed to send certificates.' });
+        res.status(500).json({ error: 'Failed to send certificates', details: error.message });
     }
 };
 
