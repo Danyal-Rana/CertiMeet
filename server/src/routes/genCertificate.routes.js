@@ -1,24 +1,24 @@
 import { Router } from "express";
-import { generateCertificates, downloadAllCertificates, sendCertificatesToEmails, deleteHtmlCertificates, deletePdfCertificates } from "../controllers/genCertificate.controller.js";
+import { 
+    generateCertificates, 
+    downloadAllCertificates, 
+    sendCertificatesToEmails, 
+    deleteGeneratedCertificates 
+} from "../controllers/genCertificate.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 // Route for generating certificates
-router.route("/generate").post(verifyJWT, generateCertificates);
-// router.post("/generate", verifyJWT, generateCertificates);
+router.route("/generate").get(verifyJWT, generateCertificates);
 
 // Route for downloading certificates as ZIP
-router.route("/download").get(verifyJWT, downloadAllCertificates);
-// router.get("/download/:genCertificateId", verifyJWT, downloadCertificatesAsZip);
+router.route("/download/:generatedCertificateId").get(verifyJWT, downloadAllCertificates);
 
-// router for sending emails to the participants
-router.route("/send-certificates").post(verifyJWT, sendCertificatesToEmails);
+// Route for sending emails to the participants
+router.route("/send-certificates/:generatedCertificateId").post(verifyJWT, sendCertificatesToEmails);
 
-// router for deleting html certificates
-router.route("/delete-html").delete(verifyJWT, deleteHtmlCertificates);
-
-// router for deleting pdf certificates
-router.route("/delete-pdf").delete(verifyJWT, deletePdfCertificates);
+// Route for deleting generated certificates
+router.route("/delete/:generatedCertificateId").delete(verifyJWT, deleteGeneratedCertificates);
 
 export default router;
