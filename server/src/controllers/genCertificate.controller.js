@@ -232,11 +232,17 @@ export const sendCertificatesToEmails = async (req, res) => {
 
             try {
                 // Fetch the PDF content
-                const response = await fetch(recipient.certificateUrl);
+                const response = await fetch(recipient.certificateUrl, {
+                    headers: {
+                        Authorization: `Bearer ${process.env.CLOUDINARY_ACCESS_TOKEN}`
+                    }
+                });                
 
                 if (!response.ok) {
+                    console.log(`Url is: ${recipient.certificateUrl}`);
+                    console.error(`Fetch error for ${recipient.certificateUrl}: ${response.statusText}`);
                     throw new Error(`Failed to fetch certificate: ${response.statusText}`);
-                }
+                }                
 
                 const pdfBuffer = await response.arrayBuffer();
 
