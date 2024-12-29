@@ -11,7 +11,7 @@ const Navbar = () => {
                 <div className="flex justify-between h-16 items-center">
                     {/* Logo Section */}
                     <div className="flex-shrink-0 flex items-center">
-                        <img className="h-8 w-auto" src="/logo.png" alt="CertiMeet" />
+                        <img className="h-8 w-auto" src="src\assets\navbarLogo2.png" alt="CertiMeet" />
                     </div>
 
                     {/* Centered Navigation Links */}
@@ -20,10 +20,9 @@ const Navbar = () => {
                             to="/"
                             end
                             className={({ isActive }) =>
-                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                                    isActive
-                                        ? "border-black text-gray-900"
-                                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                                    ? "border-black text-gray-900"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                                 }`
                             }
                         >
@@ -32,10 +31,9 @@ const Navbar = () => {
                         <NavLink
                             to="/certificate"
                             className={({ isActive }) =>
-                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                                    isActive
-                                        ? "border-black text-gray-900"
-                                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                                    ? "border-black text-gray-900"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                                 }`
                             }
                         >
@@ -44,10 +42,9 @@ const Navbar = () => {
                         <NavLink
                             to="/meetings"
                             className={({ isActive }) =>
-                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                                    isActive
-                                        ? "border-black text-gray-900"
-                                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                                    ? "border-black text-gray-900"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                                 }`
                             }
                         >
@@ -56,10 +53,9 @@ const Navbar = () => {
                         <NavLink
                             to="/dashboard"
                             className={({ isActive }) =>
-                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                                    isActive
-                                        ? "border-black text-gray-900"
-                                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                                    ? "border-black text-gray-900"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                                 }`
                             }
                         >
@@ -98,8 +94,7 @@ const Navbar = () => {
                                 to="/"
                                 end
                                 className={({ isActive }) =>
-                                    `block px-3 py-2 rounded-md text-base font-medium ${
-                                        isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -108,8 +103,7 @@ const Navbar = () => {
                             <NavLink
                                 to="/certificate"
                                 className={({ isActive }) =>
-                                    `block px-3 py-2 rounded-md text-base font-medium ${
-                                        isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -118,8 +112,7 @@ const Navbar = () => {
                             <NavLink
                                 to="/meetings"
                                 className={({ isActive }) =>
-                                    `block px-3 py-2 rounded-md text-base font-medium ${
-                                        isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -128,8 +121,7 @@ const Navbar = () => {
                             <NavLink
                                 to="/dashboard"
                                 className={({ isActive }) =>
-                                    `block px-3 py-2 rounded-md text-base font-medium ${
-                                        isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
                                     }`
                                 }
                             >
@@ -138,8 +130,7 @@ const Navbar = () => {
                             <NavLink
                                 to="/login"
                                 className={({ isActive }) =>
-                                    `block px-3 py-2 rounded-md text-base font-medium ${
-                                        isActive ? "text-black bg-gray-100" : "text-black hover:bg-gray-100"
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-black bg-gray-100" : "text-black hover:bg-gray-100"
                                     }`
                                 }
                             >
