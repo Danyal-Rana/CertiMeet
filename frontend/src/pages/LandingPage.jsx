@@ -38,7 +38,7 @@ const LandingPage = () => {
 
                                 {/* Right Side Image */}
                                 <div className="lg:w-1/2 mt-10 lg:mt-0">
-                                    <img src="https://cdn.britannica.com/29/150929-050-547070A1/lion-Kenya-Masai-Mara-National-Reserve.jpg" alt="CertiMeet" className="w-full h-auto object-cover rounded-md shadow-md" />
+                                    <img src="https://img.freepik.com/free-photo/team-working-by-group-video-call-share-ideas-brainstorming-negotiating-use-video-conference_482257-5133.jpg?t=st=1735467616~exp=1735471216~hmac=05c76828fed0668f79556f5698c24b1a382bb16d2d12aa248360eda0d6e751c8&w=826" alt="CertiMeet" className="w-full h-auto object-cover rounded-md shadow-md" />
                                 </div>
                             </div>
                         </div>
