@@ -111,14 +111,22 @@ const LandingPage = () => {
                             <div className="md:col-span-1">
                                 <h3 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl">Certificate Generation</h3>
                                 <p className="mt-3 text-lg text-gray-500">
-                                    Create professional certificates in just a few clicks. Upload your template, add recipient details, and generate certificates in bulk.
+                                    Create professional certificates effortlessly with our intuitive platform. Follow these simple steps to get started:
                                 </p>
+                                <ul className="mt-3 text-lg text-gray-500 list-disc list-inside space-y-2">
+                                    <li>Upload your custom certificate template in just a few clicks.</li>
+                                    <li>Enter recipient details individually or import them in bulk.</li>
+                                    <li>Preview the certificates to ensure everything looks perfect.</li>
+                                    <li>Generate certificates in bulk, ready for immediate download or sharing.</li>
+                                    <li>Optionally, store the certificates securely for future access or edits.</li>
+                                </ul>
+
                                 <div className="mt-10">
                                     <a href="#" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-custom hover:bg-custom/90">Try Certificate Generator</a>
                                 </div>
                             </div>
                             <div className="mt-10 relative md:mt-0">
-                                <img className="w-full rounded-xl shadow-xl ring-1 ring-black ring-opacity-5" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZQNgU_vjekDY_APdAOH3P24g8nBZlVrmvmQ&s" />
+                                <img className="w-full rounded-xl shadow-xl ring-1 ring-black ring-opacity-5" src="https://images.unsplash.com/photo-1568741046857-fc1d0486e285?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
                             </div>
                         </div>
                     </div>
@@ -126,13 +134,21 @@ const LandingPage = () => {
                     <div className="relative mt-12">
                         <div className="relative md:grid md:grid-cols-2 md:gap-8">
                             <div className="md:col-span-1 order-2 md:order-1">
-                                <img className="w-full rounded-xl shadow-xl ring-1 ring-black ring-opacity-5" src="https://cdn.prod.website-files.com/665f17d0fb4bfc1e811460d3/665f17d0fb4bfc1e8114681c_7.jpg" alt="Meeting scheduling interface" />
+                                <img className="w-full rounded-xl shadow-xl ring-1 ring-black ring-opacity-5" src="https://images.unsplash.com/photo-1585974738771-84483dd9f89f?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Meeting scheduling interface" />
                             </div>
                             <div className="mt-10 relative md:mt-0 order-1 md:order-2">
                                 <h3 className="text-2xl font-bold text-gray-900 tracking-tight sm:text-3xl">Meeting Management</h3>
                                 <p className="mt-3 text-lg text-gray-500">
-                                    Schedule meetings efficiently with our intuitive calendar interface. Send invitations, manage attendees, and track responses all in one place.
+                                    Schedule and manage meetings seamlessly using our intuitive calendar interface. Follow these steps to make the process simple and efficient:
                                 </p>
+                                <ul className="mt-3 text-lg text-gray-500 list-disc list-inside space-y-2">
+                                    <li>Pick a date and time from the easy-to-navigate calendar view.</li>
+                                    <li>Customize meeting details, including title, description, and location (online or in-person).</li>
+                                    <li>Send personalized invitations to participants with a single click.</li>
+                                    <li>Track RSVPs and monitor attendee responses in real-time.</li>
+                                    <li>Integrate the meeting schedule with your favorite tools and platforms for streamlined organization.</li>
+                                </ul>
+
                                 <div className="mt-10">
                                     <a href="#" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-custom hover:bg-custom/90">Schedule a Meeting</a>
                                 </div>
