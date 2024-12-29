@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs/promises';
+import fsSync from 'fs'; // Import the synchronous version of fs
 import path from 'path';
 import XLSX from 'xlsx';
 import csvParser from 'csv-parser';
@@ -59,28 +60,21 @@ const uploadPdfToCloudinary = async (pdfBuffer, fileName) => {
     const tempFilePath = path.join(tempDir, `${fileName}.pdf`);
 
     try {
-        // Ensure the temp directory exists
         await fs.mkdir(tempDir, { recursive: true });
-
-        // Write the PDF buffer to a temporary file
         await fs.writeFile(tempFilePath, pdfBuffer);
-
-        // Upload the file to Cloudinary
         const result = await uploadOnCloudinary(tempFilePath);
-
         return result;
     } catch (error) {
         console.error('Error in uploadPdfToCloudinary:', error);
         throw error;
     } finally {
         try {
-            // Check if the file exists before attempting to delete it
             await fs.access(tempFilePath);
             await fs.unlink(tempFilePath);
             console.log('Temporary file deleted:', tempFilePath);
         } catch (error) {
             if (error.code === 'ENOENT') {
-                // console.log('Temporary file not found (already deleted):', tempFilePath);
+                console.log('Temporary file not found (already deleted):', tempFilePath);
             } else {
                 console.error('Error deleting temporary file:', error);
             }
@@ -178,7 +172,7 @@ export const downloadAllCertificates = async (req, res) => {
 
         await fs.mkdir(zipDir, { recursive: true });
 
-        const output = fs.createWriteStream(zipFilePath);
+        const output = fsSync.createWriteStream(zipFilePath);
         const archive = archiver('zip', { zlib: { level: 9 } });
 
         output.on('close', () => {
