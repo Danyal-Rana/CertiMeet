@@ -6,7 +6,8 @@ import csvParser from 'csv-parser';
 import archiver from 'archiver';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
-import {uploadOnCloudinary} from '../utils/cloudinary.js';
+import { v2 as cloudinary } from 'cloudinary';
+import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import File from '../models/file.model.js';
 import CertificateTemplate from '../models/certificateTemplate.model.js';
 import GenCertificate from '../models/genCertificate.model.js';
@@ -54,22 +55,44 @@ const convertHtmlToPdf = async (htmlContent) => {
 
 // Helper: Upload PDF to Cloudinary
 const uploadPdfToCloudinary = async (pdfBuffer, fileName) => {
-    return new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-            { resource_type: 'raw', public_id: fileName },
-            (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
+    const tempDir = path.join(__dirname, '../../temp');
+    const tempFilePath = path.join(tempDir, `${fileName}.pdf`);
+
+    try {
+        // Ensure the temp directory exists
+        await fs.mkdir(tempDir, { recursive: true });
+
+        // Write the PDF buffer to a temporary file
+        await fs.writeFile(tempFilePath, pdfBuffer);
+
+        // Upload the file to Cloudinary
+        const result = await uploadOnCloudinary(tempFilePath);
+
+        return result;
+    } catch (error) {
+        console.error('Error in uploadPdfToCloudinary:', error);
+        throw error;
+    } finally {
+        try {
+            // Check if the file exists before attempting to delete it
+            await fs.access(tempFilePath);
+            await fs.unlink(tempFilePath);
+            console.log('Temporary file deleted:', tempFilePath);
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                // console.log('Temporary file not found (already deleted):', tempFilePath);
+            } else {
+                console.error('Error deleting temporary file:', error);
             }
-        ).end(pdfBuffer);
-    });
+        }
+    }
 };
 
 // Generate certificates
 export const generateCertificates = async (req, res) => {
     try {
         const { fileId, templateId } = req.query;
-        const userId = req.user._id; // Assuming you have user authentication middleware
+        const userId = req.user._id;
 
         const file = await File.findById(fileId);
         const template = await CertificateTemplate.findById(templateId);
@@ -107,11 +130,13 @@ export const generateCertificates = async (req, res) => {
             const fileName = `certificate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             const uploadResult = await uploadPdfToCloudinary(pdfBuffer, fileName);
 
-            generatedCertificates.push({
-                name: row.name || 'Recipient',
-                email: row.email || '',
-                certificateUrl: uploadResult.secure_url,
-            });
+            if (uploadResult) {
+                generatedCertificates.push({
+                    name: row.name || 'Recipient',
+                    email: row.email || '',
+                    certificateUrl: uploadResult.secure_url,
+                });
+            }
         }
 
         const genCertificate = new GenCertificate({
