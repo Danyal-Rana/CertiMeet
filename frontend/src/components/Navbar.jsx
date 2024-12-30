@@ -1,9 +1,36 @@
-import { NavLink } from "react-router-dom";
-import { useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import axios from 'axios';
 
 const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Fetch user data from API or local storage
+        const fetchUser = async () => {
+            try {
+                const response = await axios.get('/api/user/profile');
+                setUser(response.data.user);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/user/logout');
+            setUser(null);
+            navigate('/login');
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
 
     return (
         <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -11,7 +38,7 @@ const Navbar = () => {
                 <div className="flex justify-between h-16 items-center">
                     {/* Logo Section */}
                     <div className="flex-shrink-0 flex items-center">
-                        <img className="h-8 w-auto" src="src\assets\navbarLogo2.png" alt="CertiMeet" />
+                        <img className="h-8 w-auto" src="src/assets/navbarLogo2.png" alt="CertiMeet" />
                     </div>
 
                     {/* Centered Navigation Links */}
@@ -63,14 +90,45 @@ const Navbar = () => {
                         </NavLink>
                     </div>
 
-                    {/* Sign-In Button on the Right */}
+                    {/* Profile Icon or Sign-In Button */}
                     <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                        <NavLink
-                            to="/login"
-                            className="bg-black text-white !rounded-button px-4 py-2 text-sm font-medium hover:bg-black/90"
-                        >
-                            Sign In
-                        </NavLink>
+                        {user ? (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setMenuOpen(!menuOpen)}
+                                    className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                                >
+                                    <img
+                                        className="h-8 w-8 rounded-full"
+                                        src={user.avatar || 'src/assets/defaultAvatar.png'}
+                                        alt="User Avatar"
+                                    />
+                                </button>
+                                {menuOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1">
+                                        <NavLink
+                                            to="/account-settings"
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Account Settings
+                                        </NavLink>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <NavLink
+                                to="/login"
+                                className="bg-black text-white rounded-button px-4 py-2 text-sm font-medium hover:bg-black/90"
+                            >
+                                Sign In
+                            </NavLink>
+                        )}
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -127,15 +185,35 @@ const Navbar = () => {
                             >
                                 Dashboard
                             </NavLink>
-                            <NavLink
-                                to="/login"
-                                className={({ isActive }) =>
-                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-black bg-gray-100" : "text-black hover:bg-gray-100"
-                                    }`
-                                }
-                            >
-                                Sign In
-                            </NavLink>
+                            {user ? (
+                                <>
+                                    <NavLink
+                                        to="/account-settings"
+                                        className={({ isActive }) =>
+                                            `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                            }`
+                                        }
+                                    >
+                                        Account Settings
+                                    </NavLink>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
+                                    >
+                                        Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <NavLink
+                                    to="/login"
+                                    className={({ isActive }) =>
+                                        `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-black bg-gray-100" : "text-black hover:bg-gray-100"
+                                        }`
+                                    }
+                                >
+                                    Sign In
+                                </NavLink>
+                            )}
                         </div>
                     </div>
                 )}

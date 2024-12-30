@@ -8,6 +8,7 @@ import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import MeetingsPage from './pages/MeetingsPage';
 import OtpVerificationPage from './pages/OtpVerificationPage';
+import AccountSettingsPage from './pages/AccountSettingsPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/meetings" element={<MeetingsPage />} />
             <Route path="/otp" element={<OtpVerificationPage />} />
+            <Route path="/account-settings" element={<AccountSettingsPage />} />
           </Routes>
         </main>
         <Footer />

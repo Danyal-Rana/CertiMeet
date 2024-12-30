@@ -45,4 +45,32 @@ router.route("/change-email").put(verifyJWT, changeEmail);
 // Upload avatar (protected)
 router.route("/upload-avatar").post(verifyJWT, upload.single("avatar"), uploadAvatar);
 
+// Get user profile (protected)
+router.route("/profile").get(verifyJWT, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select("-password -refreshToken");
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching user profile" });
+    }
+});
+
+// Update user profile (protected)
+router.route("/update-profile").put(verifyJWT, async (req, res) => {
+    try {
+        const { fullName, email, username, avatar } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (fullName) user.fullName = fullName;
+        if (email) user.email = email;
+        if (username) user.username = username;
+        if (avatar) user.avatar = avatar;
+
+        await user.save();
+        res.status(200).json({ message: "Profile updated successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating profile" });
+    }
+});
+
 export default router;
