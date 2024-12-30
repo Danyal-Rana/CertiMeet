@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import MeetingsPage from './pages/MeetingsPage';
+import OtpVerificationPage from './pages/OtpVerificationPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/meetings" element={<MeetingsPage />} />
+            <Route path="/otp" element={<OtpVerificationPage />} />
           </Routes>
         </main>
         <Footer />
