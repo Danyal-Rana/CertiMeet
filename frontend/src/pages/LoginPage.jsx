@@ -13,8 +13,10 @@ const LoginPage = () => {
         setError('');
         try {
             const response = await api.post('/user/login', { email, password });
+            console.log('API Response:', response.data); // Debugging line
             if (response.data.success) {
                 // Save user data to local storage
+                console.log('Storing user data:', response.data.user); // Debugging line
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 navigate('/dashboard');
             } else {
