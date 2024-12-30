@@ -8,6 +8,12 @@ export const UserProvider = ({ children }) => {
 
     useEffect(() => {
         const fetchUser = async () => {
+            const token = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
+            if (!token) {
+                console.log('No token found, user is not authenticated');
+                return;
+            }
+
             try {
                 const response = await api.get('/user/profile');
                 setUser(response.data.user);
