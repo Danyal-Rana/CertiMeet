@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
-import axios from 'axios';
+import api from '../utils/api';
 
 const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -9,11 +9,15 @@ const Navbar = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch user data from API or local storage
         const fetchUser = async () => {
             try {
-                const response = await axios.get('/api/user/profile');
-                setUser(response.data.user);
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    setUser(JSON.parse(storedUser));
+                } else {
+                    const response = await api.get('/user/profile');
+                    setUser(response.data.user);
+                }
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
@@ -24,7 +28,8 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         try {
-            await axios.post('/api/user/logout');
+            await api.post('/user/logout');
+            localStorage.removeItem('user');
             setUser(null);
             navigate('/login');
         } catch (error) {
