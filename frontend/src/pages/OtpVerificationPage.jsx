@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import api from '../utils/api';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../utils/api'; // Adjust the import according to your project structure
 
 const OtpVerificationPage = () => {
     const [otp, setOtp] = useState('');
-    const [error, setError] = useState('');
     const [email, setEmail] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
-    const location = useLocation();
-
-    useEffect(() => {
-        if (location.state && location.state.email) {
-            setEmail(location.state.email);
-        }
-    }, [location]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,16 +29,15 @@ const OtpVerificationPage = () => {
             <div className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-2xl font-bold mb-6 text-center">Verify OTP</h2>
                 {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit}>
                     <input
                         type="text"
-                        placeholder="Enter OTP"
-                        className="w-full p-2 border rounded-md"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
-                        required
+                        className="w-full p-2 border border-gray-300 rounded mb-4"
+                        placeholder="Enter OTP"
                     />
-                    <button type="submit" className="w-full bg-black text-white py-2 rounded-md">
+                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
                         Verify OTP
                     </button>
                 </form>
