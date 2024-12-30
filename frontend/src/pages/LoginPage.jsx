@@ -17,7 +17,6 @@ const LoginPage = () => {
             const response = await api.post('/user/login', { email, password });
             console.log('API Response:', response.data); // Debugging line
             if (response.data.success) {
-                // Print the entire response to see the structure
                 console.log('Full Response:', response.data); // Debugging line
                 console.log('User Data:', response.data.data.user); // Debugging line
                 // Set user data in context
