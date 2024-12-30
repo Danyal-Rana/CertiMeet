@@ -10,9 +10,9 @@ import genCertificateRouter from './routes/genCertificate.routes.js';
 const app = express();
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true, // to allow cookies
-}))
+    origin: 'http://localhost:5174',
+    credentials: true,
+}));
 
 app.use(express.json({ limit: '16kb' })); // // it means max 16kb data of json can be sent //parses json data/bodies
 

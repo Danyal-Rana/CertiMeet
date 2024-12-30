@@ -13,15 +13,18 @@ const LoginPage = () => {
         setError('');
         try {
             const response = await api.post('/user/login', { email, password });
-            if (response.data.user) {
-                // Login successful, redirect to dashboard
+            console.log('Login response:', response.data);
+            
+            if (response.data.success) {
+                console.log('Login successful, redirecting to dashboard');
                 navigate('/dashboard');
-            } else if (response.data.redirectTo === '/verify-otp') {
-                // User needs to verify email
-                navigate('/verify-otp', { state: { email: response.data.email } });
+            } else {
+                console.log('Login failed:', response.data.message);
+                setError(response.data.message || 'Login failed. Please check your credentials and try again.');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Invalid email or password. Please try again.');
+            console.error('Login error:', err.response?.data || err.message);
+            setError(err.response?.data?.message || 'An error occurred. Please try again later.');
         }
     };
 
