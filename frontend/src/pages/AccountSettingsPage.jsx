@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const AccountSettingsPage = () => {
-    const [user, setUser] = useState({
-        fullName: '',
-        email: '',
-        username: '',
-        avatar: ''
-    });
+    const [user, setUser] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await axios.get('/api/user/profile');
+                const response = await api.get('/user/profile');
                 setUser(response.data.user);
+                setLoading(false);
             } catch (error) {
                 setError('Error fetching user data');
+                setLoading(false);
             }
         };
 
@@ -32,12 +30,20 @@ const AccountSettingsPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put('/api/user/update-profile', user);
+            const response = await api.put('/user/update-profile', user);
             setSuccess('Profile updated successfully');
         } catch (error) {
             setError('Error updating profile');
         }
     };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>{error}</div>;
+    }
 
     return (
         <div className="max-w-md mx-auto py-12 px-4">
