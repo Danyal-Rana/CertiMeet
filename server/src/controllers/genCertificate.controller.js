@@ -229,23 +229,17 @@ export const sendCertificatesToEmails = async (req, res) => {
 
         for (const recipient of genCertificate.recipients) {
             if (!recipient.email) continue;
-
+        
             try {
                 // Fetch the PDF content
-                const response = await fetch(recipient.certificateUrl, {
-                    headers: {
-                        Authorization: `Bearer ${process.env.CLOUDINARY_ACCESS_TOKEN}`
-                    }
-                });                
-
+                const response = await fetch(recipient.certificateUrl);
                 if (!response.ok) {
-                    console.log(`Url is: ${recipient.certificateUrl}`);
                     console.error(`Fetch error for ${recipient.certificateUrl}: ${response.statusText}`);
                     throw new Error(`Failed to fetch certificate: ${response.statusText}`);
-                }                
-
+                }
+        
                 const pdfBuffer = await response.arrayBuffer();
-
+        
                 const mailOptions = {
                     from: `"CertiMeet" <${process.env.EMAIL_USER}>`,
                     to: recipient.email,
@@ -254,11 +248,11 @@ export const sendCertificatesToEmails = async (req, res) => {
                     attachments: [
                         {
                             filename: `${recipient.name}_certificate.pdf`,
-                            content: Buffer.from(pdfBuffer)
-                        }
-                    ]
+                            content: Buffer.from(pdfBuffer),
+                        },
+                    ],
                 };
-
+        
                 await transporter.sendMail(mailOptions);
                 console.log(`Certificate sent successfully to ${recipient.email}`);
             } catch (error) {
@@ -266,7 +260,7 @@ export const sendCertificatesToEmails = async (req, res) => {
                 failedEmails.push({ email: recipient.email, error: error.message });
             }
         }
-
+        
         if (failedEmails.length > 0) {
             res.status(207).json({
                 message: 'Some certificates could not be sent',
