@@ -1,20 +1,31 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Implement login logic here
-        console.log('Logging in with:', email, password);
+        try {
+            const response = await api.post('/user/login', { email, password });
+            if (response.data.success) {
+                // Login successful, redirect to dashboard
+                navigate('/dashboard');
+            }
+        } catch (err) {
+            setError('Invalid email or password. Please try again.');
+        }
     };
 
     return (
         <div className="max-w-md mx-auto py-12 px-4">
             <div className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input
                         type="email"
