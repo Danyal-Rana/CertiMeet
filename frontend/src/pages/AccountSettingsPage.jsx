@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { UserContext } from '../utils/UserContext';
 
@@ -7,20 +8,13 @@ const AccountSettingsPage = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await api.get('/user/profile');
-                setUser(response.data.user);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-                setError('Error fetching user data');
-            }
-        };
-
-        fetchUser();
-    }, [setUser]);
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -76,7 +70,7 @@ const AccountSettingsPage = () => {
                         <input
                             type="text"
                             name="fullName"
-                            value={user.fullName}
+                            value={user.fullName || ''}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded"
                         />
@@ -86,7 +80,7 @@ const AccountSettingsPage = () => {
                         <input
                             type="email"
                             name="email"
-                            value={user.email}
+                            value={user.email || ''}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded"
                         />
@@ -96,7 +90,7 @@ const AccountSettingsPage = () => {
                         <input
                             type="text"
                             name="username"
-                            value={user.username}
+                            value={user.username || ''}
                             onChange={handleChange}
                             className="w-full p-2 border border-gray-300 rounded"
                         />
