@@ -1,48 +1,67 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../utils/api';
+import { UserContext } from '../utils/UserContext';
 
 const AccountSettingsPage = () => {
-    const [user, setUser] = useState(null);
+    const { user, setUser } = useContext(UserContext);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
                 const response = await api.get('/user/profile');
                 setUser(response.data.user);
-                setLoading(false);
             } catch (error) {
+                console.error('Error fetching user data:', error);
                 setError('Error fetching user data');
-                setLoading(false);
             }
         };
 
         fetchUser();
-    }, []);
+    }, [setUser]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setUser({ ...user, [name]: value });
     };
 
+    const handleFileChange = (e) => {
+        setUser({ ...user, avatar: e.target.files[0] });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        const formData = new FormData();
+        formData.append('fullName', user.fullName);
+        formData.append('email', user.email);
+        formData.append('username', user.username);
+        if (user.avatar) {
+            formData.append('avatar', user.avatar);
+        }
+
         try {
-            const response = await api.put('/user/update-profile', user);
+            const response = await api.put('/user/update-profile', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
             setSuccess('Profile updated successfully');
+            setUser(response.data.user);
         } catch (error) {
             setError('Error updating profile');
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (loading) {
+    if (!user) {
         return <div>Loading...</div>;
-    }
-
-    if (error) {
-        return <div>{error}</div>;
     }
 
     return (
@@ -87,12 +106,12 @@ const AccountSettingsPage = () => {
                         <input
                             type="file"
                             name="avatar"
-                            onChange={(e) => setUser({ ...user, avatar: e.target.files[0] })}
+                            onChange={handleFileChange}
                             className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
-                        Update Profile
+                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded" disabled={loading}>
+                        {loading ? 'Updating...' : 'Update Profile'}
                     </button>
                 </form>
             </div>
