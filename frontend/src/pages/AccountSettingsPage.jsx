@@ -17,8 +17,14 @@ const AccountSettingsPage = () => {
         setError('');
         setSuccess('');
 
+        const endpointMap = {
+            fullName: 'change-full-name',
+            email: 'change-email',
+            username: 'change-username'
+        };
+
         try {
-            const response = await api.put(`/user/change-${field}`, { [field]: value });
+            const response = await api.put(`/user/${endpointMap[field]}`, { [field]: value });
             setSuccess(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully`);
             setUser(response.data.user);
         } catch (error) {
