@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
 const LoginPage = () => {
@@ -13,18 +13,15 @@ const LoginPage = () => {
         setError('');
         try {
             const response = await api.post('/user/login', { email, password });
-            console.log('Login response:', response.data);
-            
             if (response.data.success) {
-                console.log('Login successful, redirecting to dashboard');
+                // Save user data to local storage
+                localStorage.setItem('user', JSON.stringify(response.data.user));
                 navigate('/dashboard');
             } else {
-                console.log('Login failed:', response.data.message);
-                setError(response.data.message || 'Login failed. Please check your credentials and try again.');
+                setError(response.data.message || 'Login failed. Please try again.');
             }
         } catch (err) {
-            console.error('Login error:', err.response?.data || err.message);
-            setError(err.response?.data?.message || 'An error occurred. Please try again later.');
+            setError(err.response?.data?.message || 'Login failed. Please try again.');
         }
     };
 
@@ -33,30 +30,31 @@ const LoginPage = () => {
             <div className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
                 {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className="w-full p-2 border rounded-md"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        className="w-full p-2 border rounded-md"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Email</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded"
+                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded"
+                            required
+                        />
+                    </div>
                     <button type="submit" className="w-full bg-black text-white py-2 rounded-md">
                         Login
                     </button>
                 </form>
-                <p className="mt-4 text-center">
-                    Don't have an account? <Link to="/signup" className="text-black font-bold">Sign up</Link>
-                </p>
             </div>
         </div>
     );
