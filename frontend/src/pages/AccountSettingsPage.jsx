@@ -1,62 +1,56 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import React, { useState, useContext } from 'react';
 import { UserContext } from '../utils/UserContext';
+import api from '../utils/api';
 
 const AccountSettingsPage = () => {
     const { user, setUser } = useContext(UserContext);
+    const [fullName, setFullName] = useState(user?.fullName || '');
+    const [email, setEmail] = useState(user?.email || '');
+    const [username, setUsername] = useState(user?.username || '');
+    const [avatar, setAvatar] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
+    const handleUpdate = async (field, value) => {
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const response = await api.put(`/user/change-${field}`, { [field]: value });
+            setSuccess(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully`);
+            setUser(response.data.user);
+        } catch (error) {
+            setError(`Error updating ${field}`);
+        } finally {
+            setLoading(false);
         }
-    }, [user, navigate]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setUser({ ...user, [name]: value });
     };
 
-    const handleFileChange = (e) => {
-        setUser({ ...user, avatar: e.target.files[0] });
-    };
-
-    const handleSubmit = async (e) => {
+    const handleAvatarUpload = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
         setSuccess('');
 
         const formData = new FormData();
-        formData.append('fullName', user.fullName);
-        formData.append('email', user.email);
-        formData.append('username', user.username);
-        if (user.avatar) {
-            formData.append('avatar', user.avatar);
-        }
+        formData.append('avatar', avatar);
 
         try {
-            const response = await api.put('/user/update-profile', formData, {
+            const response = await api.post('/user/upload-avatar', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            setSuccess('Profile updated successfully');
+            setSuccess('Avatar updated successfully');
             setUser(response.data.user);
         } catch (error) {
-            setError('Error updating profile');
+            setError('Error updating avatar');
         } finally {
             setLoading(false);
         }
     };
-
-    if (!user) {
-        return <div>Loading...</div>;
-    }
 
     return (
         <div className="max-w-md mx-auto py-12 px-4">
@@ -64,48 +58,63 @@ const AccountSettingsPage = () => {
                 <h2 className="text-2xl font-bold mb-6 text-center">Account Settings</h2>
                 {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                 {success && <p className="text-green-500 text-center mb-4">{success}</p>}
-                <form onSubmit={handleSubmit}>
+                
+                <form onSubmit={(e) => { e.preventDefault(); handleUpdate('fullName', fullName); }}>
                     <div className="mb-4">
                         <label className="block text-gray-700">Full Name</label>
                         <input
                             type="text"
-                            name="fullName"
-                            value={user.fullName || ''}
-                            onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={user.email || ''}
-                            onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Username</label>
-                        <input
-                            type="text"
-                            name="username"
-                            value={user.username || ''}
-                            onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Avatar</label>
-                        <input
-                            type="file"
-                            name="avatar"
-                            onChange={handleFileChange}
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
                             className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
                     <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded" disabled={loading}>
-                        {loading ? 'Updating...' : 'Update Profile'}
+                        {loading ? 'Updating...' : 'Update Full Name'}
+                    </button>
+                </form>
+
+                <form onSubmit={(e) => { e.preventDefault(); handleUpdate('email', email); }}>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Email</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded" disabled={loading}>
+                        {loading ? 'Updating...' : 'Update Email'}
+                    </button>
+                </form>
+
+                <form onSubmit={(e) => { e.preventDefault(); handleUpdate('username', username); }}>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Username</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded" disabled={loading}>
+                        {loading ? 'Updating...' : 'Update Username'}
+                    </button>
+                </form>
+
+                <form onSubmit={handleAvatarUpload}>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Avatar</label>
+                        <input
+                            type="file"
+                            onChange={(e) => setAvatar(e.target.files[0])}
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded" disabled={loading}>
+                        {loading ? 'Updating...' : 'Update Avatar'}
                     </button>
                 </form>
             </div>
