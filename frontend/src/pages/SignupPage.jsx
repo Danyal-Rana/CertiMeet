@@ -1,13 +1,15 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const SignupPage = () => {
     const [fullName, setFullName] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-    // State to store validation results
     const [passwordValidations, setPasswordValidations] = useState({
         lowercase: false,
         uppercase: false,
@@ -15,7 +17,6 @@ const SignupPage = () => {
         specialChar: false,
     });
 
-    // Password validation function
     const validatePassword = (password) => {
         const lowercase = /[a-z]/.test(password);
         const uppercase = /[A-Z]/.test(password);
@@ -36,18 +37,30 @@ const SignupPage = () => {
         validatePassword(newPassword);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Implement signup logic here
-        console.log('Signing up with:', fullName, username, email, password);
+        try {
+            const response = await axios.post('/api/auth/register', {
+                fullName,
+                username,
+                email,
+                password
+            });
+            if (response.data.success) {
+                // Registration successful, redirect to OTP verification
+                navigate('/verify-otp');
+            }
+        } catch (err) {
+            setError('Registration failed. Please try again.');
+        }
     };
 
     return (
         <div className="max-w-md mx-auto py-12 px-4">
             <div className="bg-white p-8 rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
+                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Full Name Input */}
                     <input
                         type="text"
                         placeholder="Full Name"
@@ -56,7 +69,6 @@ const SignupPage = () => {
                         onChange={(e) => setFullName(e.target.value)}
                         required
                     />
-                    {/* Username Input */}
                     <input
                         type="text"
                         placeholder="Username"
@@ -65,7 +77,6 @@ const SignupPage = () => {
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
-                    {/* Email Input */}
                     <input
                         type="email"
                         placeholder="Email"
@@ -74,7 +85,6 @@ const SignupPage = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    {/* Password Input */}
                     <input
                         type="password"
                         placeholder="Password"
