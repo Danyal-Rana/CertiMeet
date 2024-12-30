@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import { UserContext } from '../utils/UserContext';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { setUser } = useContext(UserContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,6 +20,8 @@ const LoginPage = () => {
                 // Print the entire response to see the structure
                 console.log('Full Response:', response.data); // Debugging line
                 console.log('User Data:', response.data.data.user); // Debugging line
+                // Set user data in context
+                setUser(response.data.data.user);
                 // Navigate to the dashboard
                 navigate('/dashboard');
             } else {

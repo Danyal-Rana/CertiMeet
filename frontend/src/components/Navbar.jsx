@@ -1,35 +1,17 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useContext } from "react";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import { UserContext } from '../utils/UserContext';
 import api from '../utils/api';
 
 const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [user, setUser] = useState(null);
+    const { user, setUser } = useContext(UserContext);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
-                } else {
-                    const response = await api.get('/user/profile');
-                    setUser(response.data.user);
-                }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        };
-
-        fetchUser();
-    }, []);
 
     const handleLogout = async () => {
         try {
             await api.post('/user/logout');
-            localStorage.removeItem('user');
             setUser(null);
             navigate('/login');
         } catch (error) {
