@@ -1,22 +1,33 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 
 const OtpVerificationPage = () => {
     const [otp, setOtp] = useState('');
     const [error, setError] = useState('');
+    const [email, setEmail] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state && location.state.email) {
+            setEmail(location.state.email);
+        }
+    }, [location]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         try {
-            const response = await api.post('/user/verify-otp', { otp });
+            const response = await api.post('/user/verify-otp', { otp, email });
             if (response.data.success) {
                 // OTP verified successfully
-                navigate('/login'); // Redirect to login page
+                navigate('/login');
+            } else {
+                setError(response.data.message || 'OTP verification failed. Please try again.');
             }
         } catch (err) {
-            setError('Invalid OTP. Please try again.');
+            setError(err.response?.data?.message || 'OTP verification failed. Please try again.');
         }
     };
 

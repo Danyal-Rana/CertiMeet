@@ -10,14 +10,18 @@ const LoginPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         try {
             const response = await api.post('/user/login', { email, password });
-            if (response.data.success) {
+            if (response.data.user) {
                 // Login successful, redirect to dashboard
                 navigate('/dashboard');
+            } else if (response.data.redirectTo === '/verify-otp') {
+                // User needs to verify email
+                navigate('/verify-otp', { state: { email: response.data.email } });
             }
         } catch (err) {
-            setError('Invalid email or password. Please try again.');
+            setError(err.response?.data?.message || 'Invalid email or password. Please try again.');
         }
     };
 

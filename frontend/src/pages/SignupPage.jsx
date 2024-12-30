@@ -39,6 +39,7 @@ const SignupPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         try {
             const response = await api.post('/user/register', {
                 fullName,
@@ -48,10 +49,12 @@ const SignupPage = () => {
             });
             if (response.data.success) {
                 // Registration successful, redirect to OTP verification
-                navigate('/verify-otp');
+                navigate('/verify-otp', { state: { email } });
+            } else {
+                setError(response.data.message || 'Registration failed. Please try again.');
             }
         } catch (err) {
-            setError('Registration failed. Please try again.');
+            setError(err.response?.data?.message || 'Registration failed. Please try again.');
         }
     };
 
