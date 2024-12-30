@@ -162,7 +162,17 @@ const loginUser = asyncHandler(async (req, res) => {
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
         .json(
-            new ApiResponse(200, { user: loggedInUser, accessToken, refreshToken }, "User logged in successfully.")
+            new ApiResponse(200, {
+                user: {
+                    _id: User._id,
+                    fullName: User.fullName,
+                    email: User.email,
+                    username: User.username,
+                    avatar: User.avatar,
+                },
+                accessToken,
+                refreshToken
+            }, "User logged in successfully.")
         );
 });
 
@@ -181,10 +191,10 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "User logged out."));
 });
 
-export { 
-    registerUser, 
-    loginUser, 
-    logoutUser, 
-    requestOtpForSignup, 
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    requestOtpForSignup,
     verifyOtpForSignup,
 };
