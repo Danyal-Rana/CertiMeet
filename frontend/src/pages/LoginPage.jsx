@@ -15,9 +15,10 @@ const LoginPage = () => {
             const response = await api.post('/user/login', { email, password });
             console.log('API Response:', response.data); // Debugging line
             if (response.data.success) {
-                // Save user data to local storage
-                console.log('Storing user data:', response.data.user); // Debugging line
-                localStorage.setItem('user', JSON.stringify(response.data.user));
+                // Print the entire response to see the structure
+                console.log('Full Response:', response.data); // Debugging line
+                console.log('User Data:', response.data.data.user); // Debugging line
+                // Navigate to the dashboard
                 navigate('/dashboard');
             } else {
                 setError(response.data.message || 'Login failed. Please try again.');
