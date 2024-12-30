@@ -109,7 +109,7 @@ const verifyOtpForSignup = asyncHandler(async (req, res) => {
 
         await user.save();
 
-        return res.status(200).json({ message: "OTP verified successfully. Your account is now verified." });
+        return res.status(200).json({ message: "OTP verified successfully. Your account is now verified. Go to Login Page." });
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
