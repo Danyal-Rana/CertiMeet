@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { User } from "../models/user.model.js";
+import User from "../models/user.model.js";
 import { otpMailTemplate } from "../utils/mails.js";
 
 // OTP Generation Logic

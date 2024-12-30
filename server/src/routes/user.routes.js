@@ -15,7 +15,7 @@ import {
 import { verifyOtp } from "../services/otp.service.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { User } from "../models/user.model.js";
+import User from "../models/user.model.js";
 
 const router = Router();
 
