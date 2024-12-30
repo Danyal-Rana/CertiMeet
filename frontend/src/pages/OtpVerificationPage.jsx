@@ -4,7 +4,7 @@ import api from '../utils/api'; // Adjust the import according to your project s
 
 const OtpVerificationPage = () => {
     const [otp, setOtp] = useState('');
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(''); // Assuming you have the email state
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
