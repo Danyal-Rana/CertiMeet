@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import api from '../utils/api';
+import api from './api';
 
 export const UserContext = createContext();
 
@@ -8,14 +8,6 @@ export const UserProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchUser = async () => {
-        const token = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
-        if (!token) {
-            console.log('No token found, user is not authenticated');
-            setUser(null);
-            setLoading(false);
-            return;
-        }
-
         try {
             const response = await api.get('/user/profile');
             setUser(response.data.user);
@@ -30,7 +22,12 @@ export const UserProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        fetchUser();
+        const token = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
+        if (token) {
+            fetchUser();
+        } else {
+            setLoading(false);
+        }
     }, []);
 
     const logout = async () => {

@@ -22,16 +22,49 @@ const Navbar = () => {
                     </div>
 
                     <div className="flex-1 flex justify-center sm:ml-6 sm:space-x-8">
-                        <NavLink to="/" end className={({ isActive }) => `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive ? "border-black text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"}`}>
+                        <NavLink
+                            to="/"
+                            end
+                            className={({ isActive }) =>
+                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                                    ? "border-black text-gray-900"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                }`
+                            }
+                        >
                             Home
                         </NavLink>
-                        <NavLink to="/certificate" className={({ isActive }) => `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive ? "border-black text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"}`}>
+                        <NavLink
+                            to="/certificate"
+                            className={({ isActive }) =>
+                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                                    ? "border-black text-gray-900"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                }`
+                            }
+                        >
                             Certificate
                         </NavLink>
-                        <NavLink to="/meetings" className={({ isActive }) => `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive ? "border-black text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"}`}>
+                        <NavLink
+                            to="/meetings"
+                            className={({ isActive }) =>
+                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                                    ? "border-black text-gray-900"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                }`
+                            }
+                        >
                             Meetings
                         </NavLink>
-                        <NavLink to="/dashboard" className={({ isActive }) => `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive ? "border-black text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"}`}>
+                        <NavLink
+                            to="/dashboard"
+                            className={({ isActive }) =>
+                                `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                                    ? "border-black text-gray-900"
+                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                }`
+                            }
+                        >
                             Dashboard
                         </NavLink>
                     </div>
@@ -91,21 +124,52 @@ const Navbar = () => {
                 {menuOpen && (
                     <div className="sm:hidden bg-gray-50 border-t border-gray-200">
                         <div className="px-2 pt-2 pb-3 space-y-1">
-                            <NavLink to="/" end className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"}`}>
+                            <NavLink
+                                to="/"
+                                end
+                                className={({ isActive }) =>
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                    }`
+                                }
+                            >
                                 Home
                             </NavLink>
-                            <NavLink to="/certificate" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"}`}>
+                            <NavLink
+                                to="/certificate"
+                                className={({ isActive }) =>
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                    }`
+                                }
+                            >
                                 Certificate
                             </NavLink>
-                            <NavLink to="/meetings" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"}`}>
+                            <NavLink
+                                to="/meetings"
+                                className={({ isActive }) =>
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                    }`
+                                }
+                            >
                                 Meetings
                             </NavLink>
-                            <NavLink to="/dashboard" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"}`}>
+                            <NavLink
+                                to="/dashboard"
+                                className={({ isActive }) =>
+                                    `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                    }`
+                                }
+                            >
                                 Dashboard
                             </NavLink>
                             {user ? (
                                 <>
-                                    <NavLink to="/account-settings" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"}`}>
+                                    <NavLink
+                                        to="/account-settings"
+                                        className={({ isActive }) =>
+                                            `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-gray-900 bg-gray-100" : "text-gray-700 hover:bg-gray-100"
+                                            }`
+                                        }
+                                    >
                                         Account Settings
                                     </NavLink>
                                     <button
@@ -116,7 +180,13 @@ const Navbar = () => {
                                     </button>
                                 </>
                             ) : (
-                                <NavLink to="/login" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-black bg-gray-100" : "text-black hover:bg-gray-100"}`}>
+                                <NavLink
+                                    to="/login"
+                                    className={({ isActive }) =>
+                                        `block px-3 py-2 rounded-md text-base font-medium ${isActive ? "text-black bg-gray-100" : "text-black hover:bg-gray-100"
+                                        }`
+                                    }
+                                >
                                     Sign In
                                 </NavLink>
                             )}
