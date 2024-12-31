@@ -17,14 +17,16 @@ const LoginPage = () => {
             const response = await api.post('/user/login', { email, password });
             if (response.data.success) {
                 setUser(response.data.data.user);
-                document.cookie = `accessToken=${response.data.data.accessToken}; path=/; max-age=3600; SameSite=Strict`;
-                localStorage.setItem('user', JSON.stringify(response.data.data.user));
                 navigate('/dashboard');
             } else {
                 setError(response.data.message || 'Login failed. Please try again.');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Login failed. Please try again.');
+            if (err.response && err.response.status === 401 && err.response.data.redirectTo === '/verify-otp') {
+                navigate('/verify-otp', { state: { email: err.response.data.email } });
+            } else {
+                setError(err.response?.data?.message || 'Login failed. Please try again.');
+            }
         }
     };
 

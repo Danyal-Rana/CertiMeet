@@ -11,31 +11,22 @@ export const UserProvider = ({ children }) => {
         try {
             const response = await api.get('/user/profile');
             setUser(response.data.user);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
         } catch (error) {
             console.error('Error fetching user data:', error);
             setUser(null);
-            localStorage.removeItem('user');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        const token = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
-        if (token) {
-            fetchUser();
-        } else {
-            setLoading(false);
-        }
+        fetchUser();
     }, []);
 
     const logout = async () => {
         try {
             await api.post('/user/logout');
             setUser(null);
-            localStorage.removeItem('user');
-            document.cookie = 'accessToken=; Max-Age=0; path=/; domain=' + window.location.hostname;
         } catch (error) {
             console.error('Error logging out:', error);
         }

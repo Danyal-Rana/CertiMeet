@@ -21,7 +21,7 @@ const Navbar = () => {
                         <img className="h-8 w-auto" src="src/assets/navbarLogo2.png" alt="CertiMeet" />
                     </div>
 
-                    <div className="flex-1 flex justify-center sm:ml-6 sm:space-x-8">
+                    <div className="hidden sm:flex flex-1 justify-center sm:ml-6 sm:space-x-8">
                         <NavLink
                             to="/"
                             end
