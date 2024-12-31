@@ -15,7 +15,6 @@ api.interceptors.response.use(
                 await api.post('/user/refresh-token');
                 return api(originalRequest);
             } catch (refreshError) {
-                // If refresh token fails, redirect to login
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
             }
@@ -23,5 +22,22 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+export const uploadFile = (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/files/upload', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+};
+
+export const getAllFiles = () => api.get('/files/getAllFiles');
+export const deleteFile = (fileId) => api.delete(`/files/deleteFile/${fileId}`);
+
+export const createTemplate = (templateData) => api.post('/certificateTemplates/create-template', templateData);
+export const getUserTemplates = () => api.get('/certificateTemplates/get-templates');
+export const deleteTemplate = (templateId) => api.delete(`/certificateTemplates/delete-template/${templateId}`);
 
 export default api;
