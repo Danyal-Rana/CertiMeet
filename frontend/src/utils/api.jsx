@@ -40,4 +40,8 @@ export const createTemplate = (templateData) => api.post('/certificateTemplates/
 export const getUserTemplates = () => api.get('/certificateTemplates/get-templates');
 export const deleteTemplate = (templateId) => api.delete(`/certificateTemplates/delete-template/${templateId}`);
 
+export const generateCertificates = (fileId, templateId) => api.get(`/genCertificates/generate?fileId=${fileId}&templateId=${templateId}`);
+export const sendCertificatesToEmails = (generatedCertificateId) => api.post(`/genCertificates/send-certificates/${generatedCertificateId}`);
+export const deleteGeneratedCertificates = (generatedCertificateId) => api.delete(`/genCertificates/delete/${generatedCertificateId}`);
+
 export default api;
