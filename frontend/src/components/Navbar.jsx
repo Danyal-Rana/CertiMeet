@@ -13,6 +13,7 @@ const Navbar = () => {
         try {
             await api.post('/user/logout');
             setUser(null);
+            document.cookie = 'accessToken=; Max-Age=0; path=/;';
             navigate('/login');
         } catch (error) {
             console.error('Error logging out:', error);
