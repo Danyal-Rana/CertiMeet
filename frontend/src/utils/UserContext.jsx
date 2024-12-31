@@ -19,7 +19,11 @@ export const UserProvider = ({ children }) => {
             }
 
             try {
-                const response = await api.get('/user/profile');
+                const response = await api.get('/user/profile', {
+                    headers: {
+                        Authorization: `Bearer ${token.split('=')[1]}`,
+                    },
+                });
                 setUser(response.data.user);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
             } catch (error) {
