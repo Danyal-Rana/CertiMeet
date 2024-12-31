@@ -5,7 +5,6 @@ const api = axios.create({
     withCredentials: true,
 });
 
-// Add request interceptor
 api.interceptors.request.use(
     (config) => {
         const token = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
@@ -21,13 +20,24 @@ api.interceptors.request.use(
     }
 );
 
-// Add response interceptor
 api.interceptors.response.use(
     (response) => {
         console.log('API Response:', response.status, response.data);
         return response;
     },
-    (error) => {
+    async (error) => {
+        const originalRequest = error.config;
+        if (error.response.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            try {
+                await api.post('/user/refresh-token');
+                return api(originalRequest);
+            } catch (refreshError) {
+                // If refresh token fails, redirect to login
+                window.location.href = '/login';
+                return Promise.reject(refreshError);
+            }
+        }
         console.error('API Response Error:', error.response?.status, error.response?.data || error.message);
         return Promise.reject(error);
     }
