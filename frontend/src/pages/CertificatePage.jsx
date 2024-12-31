@@ -1,47 +1,68 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { getAllFiles, getUserTemplates, generateCertificates, sendCertificatesToEmails, deleteGeneratedCertificates } from "../utils/api";
 
 const CertificatePage = () => {
-    const [userFiles, setUserFiles] = useState([]); // User files list
-    const [userTemplates, setUserTemplates] = useState([]); // User templates list
-    const [selectedFile, setSelectedFile] = useState(""); // Selected file ID
-    const [selectedTemplate, setSelectedTemplate] = useState(""); // Selected template ID
-    const [isCertificatesGenerated, setCertificatesGenerated] = useState(false); // Generation state
+    const [userFiles, setUserFiles] = useState([]);
+    const [userTemplates, setUserTemplates] = useState([]);
+    const [selectedFile, setSelectedFile] = useState("");
+    const [selectedTemplate, setSelectedTemplate] = useState("");
+    const [generatedCertificateId, setGeneratedCertificateId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-        const fetchFilesAndTemplates = async () => {
-            try {
-                const fileResponse = await axios.get("/api/files/getAllFiles", {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-                });
-                const templateResponse = await axios.get("/api/templates/get-templates", {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-                });
-
-                // Set the user files and templates
-                setUserFiles(Array.isArray(fileResponse.data) ? fileResponse.data : []);
-                setUserTemplates(Array.isArray(templateResponse.data) ? templateResponse.data : []);
-            } catch (error) {
-                console.error("Error fetching files or templates:", error);
-                setUserFiles([]);
-                setUserTemplates([]);
-            }
-        };
-
         fetchFilesAndTemplates();
     }, []);
 
-    const handleGenerateCertificates = () => {
-        console.log("Generating certificates...");
-        setCertificatesGenerated(true); // Simulate certificate generation
+    const fetchFilesAndTemplates = async () => {
+        try {
+            const [fileResponse, templateResponse] = await Promise.all([
+                getAllFiles(),
+                getUserTemplates()
+            ]);
+            setUserFiles(fileResponse.data.files || []);
+            setUserTemplates(templateResponse.data.data || []);
+        } catch (error) {
+            console.error("Error fetching files or templates:", error);
+            setError("Failed to fetch files and templates");
+        }
     };
 
-    const handleSendEmails = () => {
-        console.log("Sending certificates via email...");
+    const handleGenerateCertificates = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const response = await generateCertificates(selectedFile, selectedTemplate);
+            setGeneratedCertificateId(response.data.generatedCertificateId);
+        } catch (error) {
+            setError("Failed to generate certificates");
+        }
+        setLoading(false);
     };
 
-    const handleDeleteFromServer = () => {
-        console.log("Deleting certificates from server...");
+    const handleSendEmails = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            await sendCertificatesToEmails(generatedCertificateId);
+            alert("Certificates sent successfully");
+        } catch (error) {
+            setError("Failed to send certificates via email");
+        }
+        setLoading(false);
+    };
+
+    const handleDeleteFromServer = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            await deleteGeneratedCertificates(generatedCertificateId);
+            setGeneratedCertificateId(null);
+            alert("Certificates deleted from server");
+        } catch (error) {
+            setError("Failed to delete certificates from server");
+        }
+        setLoading(false);
     };
 
     return (
@@ -51,96 +72,75 @@ const CertificatePage = () => {
                     <h2 className="text-3xl font-bold">Certificate Generation</h2>
                 </div>
 
-                {/* File Selection */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div className="p-6 bg-white rounded-lg shadow">
                         <h3 className="text-xl font-semibold mb-4">Select File</h3>
-                        <div className="space-y-4">
-                            <select
-                                className="w-full p-2 border rounded-md"
-                                value={selectedFile}
-                                onChange={(e) => setSelectedFile(e.target.value)}
-                            >
-                                <option value="">Select a file</option>
-                                {Array.isArray(userFiles) &&
-                                    userFiles.map((file) => (
-                                        <option key={file.id} value={file.id}>
-                                            {file.name}
-                                        </option>
-                                    ))}
-                            </select>
-                            <a
-                                href="/add-file"
-                                className="bg-black text-white px-4 py-2 rounded-md inline-block text-center"
-                            >
-                                Add New File
-                            </a>
-                        </div>
+                        <select
+                            className="w-full p-2 border rounded-md"
+                            value={selectedFile}
+                            onChange={(e) => setSelectedFile(e.target.value)}
+                        >
+                            <option value="">Select a file</option>
+                            {userFiles.map((file) => (
+                                <option key={file._id} value={file._id}>
+                                    {file.fileName}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
-                    {/* Template Selection */}
                     <div className="p-6 bg-white rounded-lg shadow">
                         <h3 className="text-xl font-semibold mb-4">Select Template</h3>
-                        <div className="space-y-4">
-                            <select
-                                className="w-full p-2 border rounded-md"
-                                value={selectedTemplate}
-                                onChange={(e) => setSelectedTemplate(e.target.value)}
-                            >
-                                <option value="">Select a template</option>
-                                {Array.isArray(userTemplates) &&
-                                    userTemplates.map((template) => (
-                                        <option key={template.id} value={template.id}>
-                                            {template.name}
-                                        </option>
-                                    ))}
-                            </select>
-                            <a
-                                href="/add-template"
-                                className="bg-black text-white px-4 py-2 rounded-md inline-block text-center"
-                            >
-                                Add New Template
-                            </a>
-                        </div>
+                        <select
+                            className="w-full p-2 border rounded-md"
+                            value={selectedTemplate}
+                            onChange={(e) => setSelectedTemplate(e.target.value)}
+                        >
+                            <option value="">Select a template</option>
+                            {userTemplates.map((template) => (
+                                <option key={template._id} value={template._id}>
+                                    {template.templateName}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex space-x-4">
                     <button
-                        className={`px-6 py-2 rounded-md ${
-                            selectedFile && selectedTemplate
+                        className={`px-6 py-2 rounded-md ${selectedFile && selectedTemplate && !loading
                                 ? "bg-black text-white"
                                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        }`}
-                        disabled={!selectedFile || !selectedTemplate}
+                            }`}
+                        disabled={!selectedFile || !selectedTemplate || loading}
                         onClick={handleGenerateCertificates}
                     >
                         Generate Certificates
                     </button>
                     <button
-                        className={`px-6 py-2 rounded-md ${
-                            isCertificatesGenerated
+                        className={`px-6 py-2 rounded-md ${generatedCertificateId && !loading
                                 ? "bg-green-600 text-white"
                                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        }`}
-                        disabled={!isCertificatesGenerated}
+                            }`}
+                        disabled={!generatedCertificateId || loading}
                         onClick={handleSendEmails}
                     >
                         Send via Email
                     </button>
                     <button
-                        className={`px-6 py-2 rounded-md ${
-                            isCertificatesGenerated
+                        className={`px-6 py-2 rounded-md ${generatedCertificateId && !loading
                                 ? "bg-red-600 text-white"
                                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        }`}
-                        disabled={!isCertificatesGenerated}
+                            }`}
+                        disabled={!generatedCertificateId || loading}
                         onClick={handleDeleteFromServer}
                     >
                         Delete from Server
                     </button>
                 </div>
+
+                {loading && <p>Loading...</p>}
+                {error && <p className="text-red-500">{error}</p>}
             </div>
         </div>
     );
