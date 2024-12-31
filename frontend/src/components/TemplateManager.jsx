@@ -1,76 +1,105 @@
 import React, { useState, useEffect } from 'react';
-import { uploadFile, getAllFiles, deleteFile } from '../utils/api';
+import { createTemplate, getUserTemplates, deleteTemplate } from '../utils/api';
 
-const FileManager = () => {
-    const [files, setFiles] = useState([]);
+const TemplateManager = () => {
+    const [templates, setTemplates] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [newTemplate, setNewTemplate] = useState({ templateName: '', htmlContent: '' });
+    const [selectedHtmlFile, setSelectedHtmlFile] = useState(null);
 
     useEffect(() => {
-        fetchFiles();
+        fetchTemplates();
     }, []);
 
-    const fetchFiles = async () => {
+    const fetchTemplates = async () => {
         setLoading(true);
         try {
-            const response = await getAllFiles();
-            setFiles(response.data.files);
+            const response = await getUserTemplates();
+            setTemplates(response.data.data || []);
         } catch (err) {
-            setError('Failed to fetch files');
+            setError('Failed to fetch templates');
         }
         setLoading(false);
     };
 
-    const handleFileUpload = async (event) => {
+    const handleHtmlFileSelect = (event) => {
         const file = event.target.files[0];
         if (file) {
-            setLoading(true);
-            try {
-                await uploadFile(file);
-                await fetchFiles();
-            } catch (err) {
-                setError('Failed to upload file');
-            }
-            setLoading(false);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setNewTemplate({
+                    templateName: file.name.replace('.html', ''),
+                    htmlContent: e.target.result
+                });
+            };
+            reader.readAsText(file);
+            setSelectedHtmlFile(file);
         }
     };
 
-    const handleDeleteFile = async (fileId) => {
+    const handleCreateTemplate = async (e) => {
+        e.preventDefault();
         setLoading(true);
         try {
-            await deleteFile(fileId);
-            await fetchFiles();
+            await createTemplate(newTemplate);
+            setNewTemplate({ templateName: '', htmlContent: '' });
+            setSelectedHtmlFile(null);
+            await fetchTemplates();
         } catch (err) {
-            setError('Failed to delete file');
+            setError('Failed to create template');
+        }
+        setLoading(false);
+    };
+
+    const handleDeleteTemplate = async (templateId) => {
+        setLoading(true);
+        try {
+            await deleteTemplate(templateId);
+            await fetchTemplates();
+        } catch (err) {
+            setError('Failed to delete template');
         }
         setLoading(false);
     };
 
     return (
         <div>
-            <input
-                type="file"
-                accept=".csv,.xlsx"
-                onChange={handleFileUpload}
-                className="mb-4"
-            />
+            <form onSubmit={handleCreateTemplate} className="mb-4">
+                <input
+                    type="file"
+                    accept=".html"
+                    onChange={handleHtmlFileSelect}
+                    className="mb-2"
+                />
+                {selectedHtmlFile && (
+                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                        Create Template
+                    </button>
+                )}
+            </form>
             {loading && <p>Loading...</p>}
             {error && <p className="text-red-500">{error}</p>}
-            <ul className="space-y-2">
-                {files.map((file) => (
-                    <li key={file._id} className="flex justify-between items-center">
-                        <span>{file.fileName}</span>
-                        <button
-                            onClick={() => handleDeleteFile(file._id)}
-                            className="text-red-500"
-                        >
-                            Delete
-                        </button>
-                    </li>
-                ))}
-            </ul>
+            <h4 className="font-medium mt-4">Existing Templates:</h4>
+            {templates.length === 0 ? (
+                <p>No existing templates</p>
+            ) : (
+                <ul className="space-y-2">
+                    {templates.map((template) => (
+                        <li key={template._id} className="flex justify-between items-center">
+                            <span>{template.templateName}</span>
+                            <button
+                                onClick={() => handleDeleteTemplate(template._id)}
+                                className="text-red-500"
+                            >
+                                Delete
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };
 
-export default FileManager;
+export default TemplateManager;
