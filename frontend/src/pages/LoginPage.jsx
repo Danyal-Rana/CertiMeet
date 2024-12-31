@@ -16,8 +16,8 @@ const LoginPage = () => {
         try {
             const response = await api.post('/user/login', { email, password });
             if (response.data.success) {
-                setUser(response.data.user);
-                document.cookie = `accessToken=${response.data.token}; path=/;`;
+                setUser(response.data.data.user);
+                document.cookie = `accessToken=${response.data.data.token}; path=/;`;
                 navigate('/dashboard');
             } else {
                 setError(response.data.message || 'Login failed. Please try again.');
