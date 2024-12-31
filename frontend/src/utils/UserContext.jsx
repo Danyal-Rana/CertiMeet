@@ -14,6 +14,7 @@ export const UserProvider = ({ children }) => {
             const token = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
             if (!token) {
                 console.log('No token found, user is not authenticated');
+                setUser(null);
                 return;
             }
 
@@ -23,6 +24,7 @@ export const UserProvider = ({ children }) => {
                 localStorage.setItem('user', JSON.stringify(response.data.user));
             } catch (error) {
                 console.error('Error fetching user data:', error);
+                setUser(null);
             }
         };
 
