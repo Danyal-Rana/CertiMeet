@@ -24,11 +24,14 @@ const AccountSettingsPage = () => {
         };
 
         try {
-            const response = await api.put(`/user/${endpointMap[field]}`, { [field]: value });
+            console.log(`Updating ${field} with value:`, value);
+            const response = await api.put(`/user/${endpointMap[field]}`, { [`new${field.charAt(0).toUpperCase() + field.slice(1)}`]: value });
+            console.log(`${field} update response:`, response);
             setSuccess(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully`);
-            setUser(response.data.user);
+            setUser(prevUser => ({ ...prevUser, [field]: value }));
         } catch (error) {
-            setError(`Error updating ${field}`);
+            console.error(`Error updating ${field}:`, error.response || error);
+            setError(error.response?.data?.message || `Error updating ${field}`);
         } finally {
             setLoading(false);
         }
@@ -49,10 +52,12 @@ const AccountSettingsPage = () => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            console.log('Avatar update response:', response);
             setSuccess('Avatar updated successfully');
-            setUser(response.data.user);
+            setUser(prevUser => ({ ...prevUser, avatar: response.data.data.avatar }));
         } catch (error) {
-            setError('Error updating avatar');
+            console.error('Error updating avatar:', error.response || error);
+            setError(error.response?.data?.message || 'Error updating avatar');
         } finally {
             setLoading(false);
         }
