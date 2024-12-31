@@ -44,4 +44,8 @@ export const generateCertificates = (fileId, templateId) => api.get(`/genCertifi
 export const sendCertificatesToEmails = (generatedCertificateId) => api.post(`/genCertificates/send-certificates/${generatedCertificateId}`);
 export const deleteGeneratedCertificates = (generatedCertificateId) => api.delete(`/genCertificates/delete/${generatedCertificateId}`);
 
+// New endpoints
+export const getUserCertificates = () => api.get('/genCertificates/user-certificates');
+export const downloadCertificate = (certificateId) => api.get(`/genCertificates/download/${certificateId}`, { responseType: 'blob' });
+
 export default api;
