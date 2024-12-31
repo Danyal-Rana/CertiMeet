@@ -1,31 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { getAllFiles, getUserTemplates, generateCertificates, sendCertificatesToEmails, deleteGeneratedCertificates } from "../utils/api";
+import { getAllFiles, getUserTemplates, generateCertificates, sendCertificatesToEmails, deleteGeneratedCertificates, getUserCertificates, downloadCertificate } from "../utils/api";
 
 const CertificatePage = () => {
     const [userFiles, setUserFiles] = useState([]);
     const [userTemplates, setUserTemplates] = useState([]);
+    const [userCertificates, setUserCertificates] = useState([]);
     const [selectedFile, setSelectedFile] = useState("");
     const [selectedTemplate, setSelectedTemplate] = useState("");
-    const [generatedCertificateId, setGeneratedCertificateId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        fetchFilesAndTemplates();
+        fetchData();
     }, []);
 
-    const fetchFilesAndTemplates = async () => {
+    const fetchData = async () => {
+        setLoading(true);
         try {
-            const [fileResponse, templateResponse] = await Promise.all([
+            const [fileResponse, templateResponse, certificateResponse] = await Promise.all([
                 getAllFiles(),
-                getUserTemplates()
+                getUserTemplates(),
+                getUserCertificates()
             ]);
             setUserFiles(fileResponse.data.files || []);
             setUserTemplates(templateResponse.data.data || []);
+            setUserCertificates(certificateResponse.data.certificates || []);
         } catch (error) {
-            console.error("Error fetching files or templates:", error);
-            setError("Failed to fetch files and templates");
+            console.error("Error fetching data:", error);
+            setError("Failed to fetch data");
         }
+        setLoading(false);
     };
 
     const handleGenerateCertificates = async () => {
@@ -33,18 +37,19 @@ const CertificatePage = () => {
         setError("");
         try {
             const response = await generateCertificates(selectedFile, selectedTemplate);
-            setGeneratedCertificateId(response.data.generatedCertificateId);
+            await fetchData(); // Refresh the list of certificates
+            alert("Certificates generated successfully");
         } catch (error) {
             setError("Failed to generate certificates");
         }
         setLoading(false);
     };
 
-    const handleSendEmails = async () => {
+    const handleSendEmails = async (certificateId) => {
         setLoading(true);
         setError("");
         try {
-            await sendCertificatesToEmails(generatedCertificateId);
+            await sendCertificatesToEmails(certificateId);
             alert("Certificates sent successfully");
         } catch (error) {
             setError("Failed to send certificates via email");
@@ -52,15 +57,33 @@ const CertificatePage = () => {
         setLoading(false);
     };
 
-    const handleDeleteFromServer = async () => {
+    const handleDeleteCertificates = async (certificateId) => {
         setLoading(true);
         setError("");
         try {
-            await deleteGeneratedCertificates(generatedCertificateId);
-            setGeneratedCertificateId(null);
+            await deleteGeneratedCertificates(certificateId);
+            await fetchData(); // Refresh the list of certificates
             alert("Certificates deleted from server");
         } catch (error) {
             setError("Failed to delete certificates from server");
+        }
+        setLoading(false);
+    };
+
+    const handleDownloadCertificates = async (certificateId) => {
+        setLoading(true);
+        setError("");
+        try {
+            const response = await downloadCertificate(certificateId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `certificates_${certificateId}.zip`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            setError("Failed to download certificates");
         }
         setLoading(false);
     };
@@ -117,30 +140,47 @@ const CertificatePage = () => {
                     >
                         Generate Certificates
                     </button>
-                    <button
-                        className={`px-6 py-2 rounded-md ${generatedCertificateId && !loading
-                                ? "bg-green-600 text-white"
-                                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                            }`}
-                        disabled={!generatedCertificateId || loading}
-                        onClick={handleSendEmails}
-                    >
-                        Send via Email
-                    </button>
-                    <button
-                        className={`px-6 py-2 rounded-md ${generatedCertificateId && !loading
-                                ? "bg-red-600 text-white"
-                                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                            }`}
-                        disabled={!generatedCertificateId || loading}
-                        onClick={handleDeleteFromServer}
-                    >
-                        Delete from Server
-                    </button>
                 </div>
 
                 {loading && <p>Loading...</p>}
                 {error && <p className="text-red-500">{error}</p>}
+
+                <div className="mt-8">
+                    <h3 className="text-2xl font-bold mb-4">Your Certificates</h3>
+                    {userCertificates.length === 0 ? (
+                        <p>No certificates found.</p>
+                    ) : (
+                        <ul className="space-y-4">
+                            {userCertificates.map((cert) => (
+                                <li key={cert._id} className="bg-white p-4 rounded-lg shadow">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-medium">{cert.templateName}</span>
+                                        <div className="space-x-2">
+                                            <button
+                                                onClick={() => handleDownloadCertificates(cert._id)}
+                                                className="bg-blue-500 text-white px-3 py-1 rounded-md"
+                                            >
+                                                Download
+                                            </button>
+                                            <button
+                                                onClick={() => handleSendEmails(cert._id)}
+                                                className="bg-green-500 text-white px-3 py-1 rounded-md"
+                                            >
+                                                Send Email
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteCertificates(cert._id)}
+                                                className="bg-red-500 text-white px-3 py-1 rounded-md"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
             </div>
         </div>
     );
