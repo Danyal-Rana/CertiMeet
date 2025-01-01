@@ -23,5 +23,6 @@ router.route("/send-certificates/:generatedCertificateId").post(verifyJWT, sendC
 router.route("/delete/:generatedCertificateId").delete(verifyJWT, deleteGeneratedCertificates);
 
 router.route("/user-certificates").get(verifyJWT, getUserCertificates);
+router.get("/user-certificates", verifyJWT, getUserCertificates);
 
 export default router;

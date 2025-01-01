@@ -303,26 +303,33 @@ export const deleteGeneratedCertificates = async (req, res) => {
 };
 
 export const getUserCertificates = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+    try {
+        const userId = req.user._id;
 
-    const certificates = await GenCertificate.find({ generatedBy: userId })
-        .populate('templateId', 'templateName')
-        .sort({ createdAt: -1 });
+        const certificates = await GenCertificate.find({ generatedBy: userId })
+            .populate('templateId', 'templateName')
+            .sort({ createdAt: -1 });
 
-    if (!certificates || certificates.length === 0) {
+        if (!certificates || certificates.length === 0) {
+            return res.status(200).json(
+                new ApiResponse(200, [], "No certificates found for the user")
+            );
+        }
+
+        const formattedCertificates = certificates.map(cert => ({
+            _id: cert._id,
+            templateName: cert.templateId ? cert.templateId.templateName : 'Unknown Template',
+            createdAt: cert.createdAt,
+            recipientsCount: cert.recipients ? cert.recipients.length : 0
+        }));
+
         return res.status(200).json(
-            new ApiResponse(200, [], "No certificates found for the user")
+            new ApiResponse(200, formattedCertificates, "User certificates fetched successfully")
+        );
+    } catch (error) {
+        console.error("Error in getUserCertificates:", error);
+        return res.status(500).json(
+            new ApiResponse(500, null, "An error occurred while fetching user certificates")
         );
     }
-
-    const formattedCertificates = certificates.map(cert => ({
-        _id: cert._id,
-        templateName: cert.templateId ? cert.templateId.templateName : 'Unknown Template',
-        createdAt: cert.createdAt,
-        recipientsCount: cert.recipients.length
-    }));
-
-    return res.status(200).json(
-        new ApiResponse(200, formattedCertificates, "User certificates fetched successfully")
-    );
 });

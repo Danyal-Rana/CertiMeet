@@ -46,7 +46,16 @@ export const sendCertificatesToEmails = (generatedCertificateId) => api.post(`/g
 export const deleteGeneratedCertificates = (generatedCertificateId) => api.delete(`/genCertificates/delete/${generatedCertificateId}`);
 
 // New endpoints
-export const getUserCertificates = () => api.get('/genCertificates/user-certificates');
+export const getUserCertificates = async () => {
+    try {
+        const response = await api.get('/genCertificates/user-certificates');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user certificates:", error.response?.data || error.message);
+        throw error;
+    }
+};
+
 export const downloadCertificate = (certificateId) => api.get(`/genCertificates/download/${certificateId}`, { responseType: 'blob' });
 
 export default api;
