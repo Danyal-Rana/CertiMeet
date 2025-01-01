@@ -23,7 +23,12 @@ const CertificatePage = () => {
                 getUserTemplates(),
                 getUserCertificates()
             ]);
-            setUserFiles(fileResponse.data || []);
+            console.log("Files response:", fileResponse);
+            console.log("Templates response:", templateResponse);
+            console.log("Certificates response:", certificateResponse);
+            
+            // Handle different response structures
+            setUserFiles(fileResponse.files || []);
             setUserTemplates(templateResponse.data || []);
             setUserCertificates(certificateResponse.data || []);
         } catch (error) {
@@ -137,10 +142,11 @@ const CertificatePage = () => {
 
                 <div className="flex space-x-4">
                     <button
-                        className={`px-6 py-2 rounded-md ${selectedFile && selectedTemplate && !loading
+                        className={`px-6 py-2 rounded-md ${
+                            selectedFile && selectedTemplate && !loading
                                 ? "bg-black text-white"
                                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                            }`}
+                        }`}
                         disabled={!selectedFile || !selectedTemplate || loading}
                         onClick={handleGenerateCertificates}
                     >

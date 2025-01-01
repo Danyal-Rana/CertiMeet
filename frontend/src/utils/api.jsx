@@ -47,6 +47,7 @@ export const uploadFile = (file) => {
 export const getAllFiles = async () => {
     try {
         const response = await api.get('/files/getAllFiles');
+        console.log("getAllFiles response:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching files:", error.response?.data || error.message);
@@ -61,6 +62,7 @@ export const createTemplate = (templateData) => api.post('/certificateTemplates/
 export const getUserTemplates = async () => {
     try {
         const response = await api.get('/certificateTemplates/get-templates');
+        console.log("getUserTemplates response:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching templates:", error.response?.data || error.message);
@@ -77,6 +79,7 @@ export const deleteGeneratedCertificates = (generatedCertificateId) => api.delet
 export const getUserCertificates = async () => {
     try {
         const response = await api.get('/genCertificates/user-certificates');
+        console.log("getUserCertificates response:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching user certificates:", error.response?.data || error.message);
