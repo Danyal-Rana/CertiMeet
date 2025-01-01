@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import { loginUser } from '../utils/api';
 import { UserContext } from '../utils/UserContext';
 
 const LoginPage = () => {
@@ -14,19 +14,15 @@ const LoginPage = () => {
         e.preventDefault();
         setError('');
         try {
-            const response = await api.post('/user/login', { email, password });
-            if (response.data.success) {
-                setUser(response.data.data.user);
+            const response = await loginUser(email, password);
+            if (response.success) {
+                setUser(response.data.user);
                 navigate('/dashboard');
             } else {
-                setError(response.data.message || 'Login failed. Please try again.');
+                setError(response.message || 'Login failed. Please try again.');
             }
         } catch (err) {
-            if (err.response && err.response.status === 401 && err.response.data.redirectTo === '/verify-otp') {
-                navigate('/verify-otp', { state: { email: err.response.data.email } });
-            } else {
-                setError(err.response?.data?.message || 'Login failed. Please try again.');
-            }
+            setError(err.response?.data?.message || 'Login failed. Please try again.');
         }
     };
 

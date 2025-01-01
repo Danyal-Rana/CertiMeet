@@ -13,6 +13,7 @@ import File from '../models/file.model.js';
 import CertificateTemplate from '../models/certificateTemplate.model.js';
 import GenCertificate from '../models/genCertificate.model.js';
 import {asyncHandler} from '../utils/asyncHandler.js';
+import {ApiResponse} from '../utils/ApiResponse.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -24,6 +24,16 @@ api.interceptors.response.use(
     }
 );
 
+export const loginUser = async (email, password) => {
+    try {
+        const response = await api.post('/user/login', { email, password });
+        return response.data;
+    } catch (error) {
+        console.error("Login error:", error.response?.data || error.message);
+        throw error;
+    }
+};
+
 export const uploadFile = (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -34,18 +44,36 @@ export const uploadFile = (file) => {
     });
 };
 
-export const getAllFiles = () => api.get('/files/getAllFiles');
+export const getAllFiles = async () => {
+    try {
+        const response = await api.get('/files/getAllFiles');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching files:", error.response?.data || error.message);
+        throw error;
+    }
+};
+
 export const deleteFile = (fileId) => api.delete(`/files/deleteFile/${fileId}`);
 
 export const createTemplate = (templateData) => api.post('/certificateTemplates/create-template', templateData);
-export const getUserTemplates = () => api.get('/certificateTemplates/get-templates');
+
+export const getUserTemplates = async () => {
+    try {
+        const response = await api.get('/certificateTemplates/get-templates');
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching templates:", error.response?.data || error.message);
+        throw error;
+    }
+};
+
 export const deleteTemplate = (templateId) => api.delete(`/certificateTemplates/delete-template/${templateId}`);
 
 export const generateCertificates = (fileId, templateId) => api.get(`/genCertificates/generate?fileId=${fileId}&templateId=${templateId}`);
 export const sendCertificatesToEmails = (generatedCertificateId) => api.post(`/genCertificates/send-certificates/${generatedCertificateId}`);
 export const deleteGeneratedCertificates = (generatedCertificateId) => api.delete(`/genCertificates/delete/${generatedCertificateId}`);
 
-// New endpoints
 export const getUserCertificates = async () => {
     try {
         const response = await api.get('/genCertificates/user-certificates');

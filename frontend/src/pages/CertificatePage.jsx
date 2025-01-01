@@ -23,24 +23,12 @@ const CertificatePage = () => {
                 getUserTemplates(),
                 getUserCertificates()
             ]);
-            setUserFiles(fileResponse.data.files || []);
-            setUserTemplates(templateResponse.data.data || []);
-            setUserCertificates(certificateResponse.data.data || []);
+            setUserFiles(fileResponse.data || []);
+            setUserTemplates(templateResponse.data || []);
+            setUserCertificates(certificateResponse.data || []);
         } catch (error) {
             console.error("Error fetching data:", error);
-            let errorMessage = "Failed to fetch data. Please try again later.";
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
-                errorMessage = `Server error: ${error.response.status} - ${error.response.data.message || error.response.statusText}`;
-            } else if (error.request) {
-                // The request was made but no response was received
-                errorMessage = "No response received from server. Please check your connection.";
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                errorMessage = `Error: ${error.message}`;
-            }
-            setError(errorMessage);
+            setError("Failed to fetch data. Please try again later.");
         } finally {
             setLoading(false);
         }
@@ -50,13 +38,14 @@ const CertificatePage = () => {
         setLoading(true);
         setError("");
         try {
-            const response = await generateCertificates(selectedFile, selectedTemplate);
+            await generateCertificates(selectedFile, selectedTemplate);
             await fetchData(); // Refresh the list of certificates
             alert("Certificates generated successfully");
         } catch (error) {
             setError("Failed to generate certificates");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleSendEmails = async (certificateId) => {
@@ -67,8 +56,9 @@ const CertificatePage = () => {
             alert("Certificates sent successfully");
         } catch (error) {
             setError("Failed to send certificates via email");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleDeleteCertificates = async (certificateId) => {
@@ -80,8 +70,9 @@ const CertificatePage = () => {
             alert("Certificates deleted from server");
         } catch (error) {
             setError("Failed to delete certificates from server");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleDownloadCertificates = async (certificateId) => {
@@ -98,8 +89,9 @@ const CertificatePage = () => {
             link.remove();
         } catch (error) {
             setError("Failed to download certificates");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
@@ -145,11 +137,10 @@ const CertificatePage = () => {
 
                 <div className="flex space-x-4">
                     <button
-                        className={`px-6 py-2 rounded-md ${
-                            selectedFile && selectedTemplate && !loading
+                        className={`px-6 py-2 rounded-md ${selectedFile && selectedTemplate && !loading
                                 ? "bg-black text-white"
                                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        }`}
+                            }`}
                         disabled={!selectedFile || !selectedTemplate || loading}
                         onClick={handleGenerateCertificates}
                     >
