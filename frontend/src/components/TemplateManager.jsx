@@ -16,9 +16,15 @@ const TemplateManager = () => {
         setLoading(true);
         try {
             const response = await getUserTemplates();
-            setTemplates(response.data.data || []);
+            if (response.success && Array.isArray(response.data)) {
+                setTemplates(response.data);
+                setError('');
+            } else {
+                setError('Unexpected response format');
+            }
         } catch (err) {
             setError('Failed to fetch templates');
+            console.error('Error fetching templates:', err);
         }
         setLoading(false);
     };
@@ -48,6 +54,7 @@ const TemplateManager = () => {
             await fetchTemplates();
         } catch (err) {
             setError('Failed to create template');
+            console.error('Error creating template:', err);
         }
         setLoading(false);
     };
@@ -59,6 +66,7 @@ const TemplateManager = () => {
             await fetchTemplates();
         } catch (err) {
             setError('Failed to delete template');
+            console.error('Error deleting template:', err);
         }
         setLoading(false);
     };

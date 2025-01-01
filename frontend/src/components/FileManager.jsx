@@ -15,13 +15,15 @@ const FileManager = () => {
         setLoading(true);
         try {
             const response = await getAllFiles();
-            setFiles(response.data.files || []);
-        } catch (err) {
-            if (err.response && err.response.status === 404) {
-                setFiles([]);
+            if (response.success && Array.isArray(response.files)) {
+                setFiles(response.files);
+                setError('');
             } else {
-                setError('Failed to fetch files');
+                setError('Unexpected response format');
             }
+        } catch (err) {
+            setError('Failed to fetch files');
+            console.error('Error fetching files:', err);
         }
         setLoading(false);
     };
@@ -39,6 +41,7 @@ const FileManager = () => {
                 setSelectedFile(null);
             } catch (err) {
                 setError('Failed to upload file');
+                console.error('Error uploading file:', err);
             }
             setLoading(false);
         }
@@ -51,6 +54,7 @@ const FileManager = () => {
             await fetchFiles();
         } catch (err) {
             setError('Failed to delete file');
+            console.error('Error deleting file:', err);
         }
         setLoading(false);
     };
