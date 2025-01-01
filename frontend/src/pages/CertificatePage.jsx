@@ -16,6 +16,7 @@ const CertificatePage = () => {
 
     const fetchData = async () => {
         setLoading(true);
+        setError("");
         try {
             const [fileResponse, templateResponse, certificateResponse] = await Promise.all([
                 getAllFiles(),
@@ -24,12 +25,25 @@ const CertificatePage = () => {
             ]);
             setUserFiles(fileResponse.data.files || []);
             setUserTemplates(templateResponse.data.data || []);
-            setUserCertificates(certificateResponse.data.certificates || []);
+            setUserCertificates(certificateResponse.data.data || []);
         } catch (error) {
             console.error("Error fetching data:", error);
-            setError("Failed to fetch data");
+            let errorMessage = "Failed to fetch data. Please try again later.";
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                errorMessage = `Server error: ${error.response.status} - ${error.response.data.message || error.response.statusText}`;
+            } else if (error.request) {
+                // The request was made but no response was received
+                errorMessage = "No response received from server. Please check your connection.";
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                errorMessage = `Error: ${error.message}`;
+            }
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleGenerateCertificates = async () => {
@@ -131,10 +145,11 @@ const CertificatePage = () => {
 
                 <div className="flex space-x-4">
                     <button
-                        className={`px-6 py-2 rounded-md ${selectedFile && selectedTemplate && !loading
+                        className={`px-6 py-2 rounded-md ${
+                            selectedFile && selectedTemplate && !loading
                                 ? "bg-black text-white"
                                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                            }`}
+                        }`}
                         disabled={!selectedFile || !selectedTemplate || loading}
                         onClick={handleGenerateCertificates}
                     >
@@ -142,8 +157,8 @@ const CertificatePage = () => {
                     </button>
                 </div>
 
-                {loading && <p>Loading...</p>}
-                {error && <p className="text-red-500">{error}</p>}
+                {loading && <p className="text-blue-500">Loading...</p>}
+                {error && <p className="text-red-500 bg-red-100 p-3 rounded">{error}</p>}
 
                 <div className="mt-8">
                     <h3 className="text-2xl font-bold mb-4">Your Certificates</h3>
@@ -154,7 +169,11 @@ const CertificatePage = () => {
                             {userCertificates.map((cert) => (
                                 <li key={cert._id} className="bg-white p-4 rounded-lg shadow">
                                     <div className="flex justify-between items-center">
-                                        <span className="font-medium">{cert.templateName}</span>
+                                        <div>
+                                            <span className="font-medium">{cert.templateName}</span>
+                                            <p className="text-sm text-gray-500">Created: {new Date(cert.createdAt).toLocaleDateString()}</p>
+                                            <p className="text-sm text-gray-500">Recipients: {cert.recipientsCount}</p>
+                                        </div>
                                         <div className="space-x-2">
                                             <button
                                                 onClick={() => handleDownloadCertificates(cert._id)}

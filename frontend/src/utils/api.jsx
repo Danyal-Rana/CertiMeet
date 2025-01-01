@@ -9,12 +9,13 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        if (error.response.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
                 await api.post('/user/refresh-token');
                 return api(originalRequest);
             } catch (refreshError) {
+                console.error('Error refreshing token:', refreshError.response?.data || refreshError.message);
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
             }

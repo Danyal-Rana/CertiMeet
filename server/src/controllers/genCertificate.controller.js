@@ -12,6 +12,7 @@ import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import File from '../models/file.model.js';
 import CertificateTemplate from '../models/certificateTemplate.model.js';
 import GenCertificate from '../models/genCertificate.model.js';
+import {asyncHandler} from '../utils/asyncHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -300,3 +301,28 @@ export const deleteGeneratedCertificates = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete generated certificates.' });
     }
 };
+
+export const getUserCertificates = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const certificates = await GenCertificate.find({ generatedBy: userId })
+        .populate('templateId', 'templateName')
+        .sort({ createdAt: -1 });
+
+    if (!certificates || certificates.length === 0) {
+        return res.status(200).json(
+            new ApiResponse(200, [], "No certificates found for the user")
+        );
+    }
+
+    const formattedCertificates = certificates.map(cert => ({
+        _id: cert._id,
+        templateName: cert.templateId ? cert.templateId.templateName : 'Unknown Template',
+        createdAt: cert.createdAt,
+        recipientsCount: cert.recipients.length
+    }));
+
+    return res.status(200).json(
+        new ApiResponse(200, formattedCertificates, "User certificates fetched successfully")
+    );
+});
