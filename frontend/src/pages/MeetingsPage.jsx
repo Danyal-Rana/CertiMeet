@@ -4,7 +4,7 @@ const MeetingsPage = () => {
             <div className="text-center">
                 <h2 className="text-3xl font-bold">Meetings</h2>
                 <p className="mt-4 text-gray-600">No meetings scheduled yet.</p>
-                {/* Add meeting management functionality here */}
+                {/* Coming soon: meeting management functionality here */}
             </div>
         </div>
     );
