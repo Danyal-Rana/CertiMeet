@@ -49,7 +49,7 @@ const SignupPage = () => {
             });
             if (response.data.success) {
                 // Registration successful, redirect to OTP verification
-                navigate('/otp', { state: { email } });
+                navigate('/verify-otp', { state: { email } });
             } else {
                 setError(response.data.message || 'Registration failed. Please try again.');
             }
