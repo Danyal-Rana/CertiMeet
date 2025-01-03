@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs/promises';
-import fsSync from 'fs'; // Import the synchronous version of fs
+import fsSync from 'fs';
 import path from 'path';
 import XLSX from 'xlsx';
 import csvParser from 'csv-parser';
@@ -12,8 +12,10 @@ import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import File from '../models/file.model.js';
 import CertificateTemplate from '../models/certificateTemplate.model.js';
 import GenCertificate from '../models/genCertificate.model.js';
-import {asyncHandler} from '../utils/asyncHandler.js';
-import {ApiResponse} from '../utils/ApiResponse.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
+import QRCode from 'qrcode';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,11 +49,24 @@ const convertHtmlToPdf = async (htmlContent) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        landscape: true,
+    
+    // Get the dimensions of the content
+    const dimensions = await page.evaluate(() => {
+        const element = document.body;
+        return {
+            width: element.scrollWidth,
+            height: element.scrollHeight
+        };
     });
+
+    // Set the page size to match the content
+    const pdfBuffer = await page.pdf({
+        width: dimensions.width,
+        height: dimensions.height,
+        printBackground: true,
+        pageRanges: '1'
+    });
+    
     await browser.close();
     return pdfBuffer;
 };
@@ -117,6 +132,15 @@ export const generateCertificates = async (req, res) => {
         for (const row of fileData) {
             let htmlContent = template.htmlContent;
 
+            // Generate a unique verification code
+            const verificationCode = crypto.randomBytes(16).toString('hex');
+
+            // Generate QR code
+            const qrCodeDataURL = await QRCode.toDataURL(`${process.env.FRONTEND_URL}/verify/${verificationCode}`);
+
+            // Replace QR code placeholder if it exists
+            htmlContent = htmlContent.replace('{{QR_CODE_PLACEHOLDER}}', `<img src="${qrCodeDataURL}" alt="Verification QR Code" />`);
+
             placeholders.forEach(placeholder => {
                 const value = row[fieldMapping[placeholder]] || 'N/A';
                 htmlContent = htmlContent.replace(new RegExp(`{{\\s*${placeholder}\\s*}}`, 'gi'), value);
@@ -131,6 +155,7 @@ export const generateCertificates = async (req, res) => {
                     name: row.name || 'Recipient',
                     email: row.email || '',
                     certificateUrl: uploadResult.secure_url,
+                    verificationCode
                 });
             }
         }
@@ -333,4 +358,30 @@ export const getUserCertificates = asyncHandler(async (req, res) => {
             new ApiResponse(500, null, "An error occurred while fetching user certificates")
         );
     }
+});
+
+export const verifyCertificate = asyncHandler(async (req, res) => {
+    const { verificationCode } = req.params;
+
+    const certificate = await GenCertificate.findOne({ 'recipients.verificationCode': verificationCode });
+
+    if (!certificate) {
+        return res.status(404).json(
+            new ApiResponse(404, null, "Certificate not found")
+        );
+    }
+
+    const recipient = certificate.recipients.find(r => r.verificationCode === verificationCode);
+
+    return res.status(200).json(
+        new ApiResponse(200, { 
+            isValid: true, 
+            certificate: {
+                _id: certificate._id,
+                recipient: recipient.name,
+                email: recipient.email,
+                createdAt: certificate.createdAt
+            }
+        }, "Certificate verified successfully")
+    );
 });

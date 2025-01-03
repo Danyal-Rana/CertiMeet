@@ -4,7 +4,8 @@ import {
     downloadAllCertificates, 
     sendCertificatesToEmails, 
     deleteGeneratedCertificates,
-    getUserCertificates
+    getUserCertificates,
+    verifyCertificate
 } from "../controllers/genCertificate.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -22,7 +23,10 @@ router.route("/send-certificates/:generatedCertificateId").post(verifyJWT, sendC
 // Route for deleting generated certificates
 router.route("/delete/:generatedCertificateId").delete(verifyJWT, deleteGeneratedCertificates);
 
+// Route for getting user certificates
 router.route("/user-certificates").get(verifyJWT, getUserCertificates);
-router.get("/user-certificates", verifyJWT, getUserCertificates);
+
+// New route for verifying certificates
+router.route("/verify/:verificationCode").get(verifyCertificate);
 
 export default router;
