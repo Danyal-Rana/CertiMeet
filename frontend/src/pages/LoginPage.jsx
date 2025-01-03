@@ -16,7 +16,12 @@ const LoginPage = () => {
         try {
             const response = await loginUser(email, password);
             if (response.success) {
-                setUser(response.data.user);
+                const user = response.data.user;
+                if (!user.isVerified) {
+                    navigate('/verify-otp', { state: { email } });
+                    return;
+                }
+                setUser(user);
                 navigate('/dashboard');
             } else {
                 setError(response.message || 'Login failed. Please try again.');
