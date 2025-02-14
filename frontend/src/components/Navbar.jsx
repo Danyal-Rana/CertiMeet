@@ -18,7 +18,7 @@ const Navbar = () => {
             <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16 items-center">
                     <div className="flex-shrink-0 flex items-center">
-                        <img className="h-8 w-auto" src="https://certi-meet-zbpk.vercel.app/src/assets/navbarLogo2.png" alt="CertiMeet" />
+                        <img className="h-8 w-auto" src="https://github.com/Danyal-Rana/CertiMeet/blob/main/frontend/src/assets/navbarLogo2.png" alt="CertiMeet" />
                     </div>
 
                     <div className="hidden sm:flex flex-1 justify-center sm:ml-6 sm:space-x-8">
