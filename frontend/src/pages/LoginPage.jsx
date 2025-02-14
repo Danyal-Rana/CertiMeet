@@ -17,10 +17,10 @@ const LoginPage = () => {
             const response = await loginUser(email, password);
             if (response.success) {
                 const user = response.data.user;
-                if (!user.isVerified) {
-                    navigate('/verify-otp', { state: { email } });
-                    return;
-                }
+                // if (!user.isVerified) {
+                //     navigate('/verify-otp', { state: { email } });
+                //     return;
+                // }
                 setUser(user);
                 navigate('/dashboard');
             } else {

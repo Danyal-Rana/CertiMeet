@@ -13,6 +13,7 @@ import File from '../models/file.model.js';
 import CertificateTemplate from '../models/certificateTemplate.model.js';
 import GenCertificate from '../models/genCertificate.model.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
@@ -50,21 +51,24 @@ const convertHtmlToPdf = async (htmlContent) => {
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     
-    // Get the dimensions of the content
-    const dimensions = await page.evaluate(() => {
-        const element = document.body;
-        return {
-            width: element.scrollWidth,
-            height: element.scrollHeight
-        };
+    // Set a landscape-oriented page size (A4 Landscape)
+    await page.setViewport({
+        width: 1920,
+        height: 1080,
+        deviceScaleFactor: 1,
     });
 
-    // Set the page size to match the content
     const pdfBuffer = await page.pdf({
-        width: dimensions.width,
-        height: dimensions.height,
+        format: 'A4',
+        landscape: true,
         printBackground: true,
-        pageRanges: '1'
+        preferCSSPageSize: true,
+        margin: {
+            top: '1cm',
+            right: '1cm',
+            bottom: '1cm',
+            left: '1cm',
+        },
     });
     
     await browser.close();
@@ -109,13 +113,13 @@ export const generateCertificates = async (req, res) => {
         const template = await CertificateTemplate.findById(templateId);
 
         if (!file || !template) {
-            return res.status(400).json({ success: false, message: 'Invalid file or template ID' });
+            throw new ApiError(400, "Invalid file or template ID");
         }
 
         const fileData = await parseFile(file.secure_url, file.type);
 
         if (fileData.length === 0) {
-            return res.status(400).json({ success: false, message: 'File is empty' });
+            throw new ApiError(400, "File is empty");
         }
 
         const placeholders = template.placeholders.map(p => p.replace(/[{}]/g, '').trim().toLowerCase());
@@ -138,8 +142,8 @@ export const generateCertificates = async (req, res) => {
             // Generate QR code
             const qrCodeDataURL = await QRCode.toDataURL(`${process.env.FRONTEND_URL}/verify/${verificationCode}`);
 
-            // Replace QR code placeholder if it exists
-            htmlContent = htmlContent.replace('{{QR_CODE_PLACEHOLDER}}', `<img src="${qrCodeDataURL}" alt="Verification QR Code" />`);
+            // Replace QR code placeholder
+            htmlContent = htmlContent.replace('{{qrCode}}', `<img src="${qrCodeDataURL}" alt="Verification QR Code" style="width: 100px; height: 100px;" />`);
 
             placeholders.forEach(placeholder => {
                 const value = row[fieldMapping[placeholder]] || 'N/A';
@@ -169,18 +173,12 @@ export const generateCertificates = async (req, res) => {
 
         await genCertificate.save();
 
-        res.status(200).json({
-            success: true,
-            message: 'Certificates generated and stored successfully',
-            generatedCertificateId: genCertificate._id,
-        });
+        res.status(200).json(
+            new ApiResponse(200, { generatedCertificateId: genCertificate._id }, "Certificates generated and stored successfully")
+        );
     } catch (error) {
         console.error('Error generating certificates:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error generating certificates',
-            error: error.message,
-        });
+        throw new ApiError(500, "Error generating certificates: " + error.message);
     }
 };
 
@@ -191,7 +189,7 @@ export const downloadAllCertificates = async (req, res) => {
         const genCertificate = await GenCertificate.findById(generatedCertificateId);
 
         if (!genCertificate) {
-            return res.status(404).json({ error: 'Generated certificates not found.' });
+            throw new ApiError(404, "Generated certificates not found.");
         }
 
         const zipDir = path.join(__dirname, '../../public/zipFiles');
@@ -206,7 +204,7 @@ export const downloadAllCertificates = async (req, res) => {
             res.download(zipFilePath, 'certificates.zip', async (err) => {
                 if (err) {
                     console.error('Error in download:', err);
-                    res.status(500).json({ error: 'Failed to download certificates.' });
+                    throw new ApiError(500, "Failed to download certificates.");
                 } else {
                     console.log('Certificates successfully downloaded.');
                     await fs.unlink(zipFilePath);
@@ -215,7 +213,7 @@ export const downloadAllCertificates = async (req, res) => {
         });
 
         archive.on('error', (err) => {
-            throw err;
+            throw new ApiError(500, "Error creating zip file: " + err.message);
         });
 
         archive.pipe(output);
@@ -230,7 +228,7 @@ export const downloadAllCertificates = async (req, res) => {
         await archive.finalize();
     } catch (error) {
         console.error('Error during zipping and downloading:', error);
-        res.status(500).json({ error: 'Failed to download certificates.' });
+        throw new ApiError(500, "Failed to download certificates: " + error.message);
     }
 };
 
@@ -241,7 +239,7 @@ export const sendCertificatesToEmails = async (req, res) => {
         const genCertificate = await GenCertificate.findById(generatedCertificateId);
 
         if (!genCertificate) {
-            return res.status(404).json({ error: 'Generated certificates not found.' });
+            throw new ApiError(404, "Generated certificates not found.");
         }
 
         const transporter = nodemailer.createTransport({
@@ -289,16 +287,17 @@ export const sendCertificatesToEmails = async (req, res) => {
         }
         
         if (failedEmails.length > 0) {
-            res.status(207).json({
-                message: 'Some certificates could not be sent',
-                failedEmails: failedEmails
-            });
+            res.status(207).json(
+                new ApiResponse(207, { failedEmails }, 'Some certificates could not be sent')
+            );
         } else {
-            res.status(200).json({ message: 'All certificates sent successfully!' });
+            res.status(200).json(
+                new ApiResponse(200, null, 'All certificates sent successfully!')
+            );
         }
     } catch (error) {
         console.error('Error sending certificates:', error);
-        res.status(500).json({ error: 'Failed to send certificates', details: error.message });
+        throw new ApiError(500, "Failed to send certificates: " + error.message);
     }
 };
 
@@ -309,7 +308,7 @@ export const deleteGeneratedCertificates = async (req, res) => {
         const genCertificate = await GenCertificate.findById(generatedCertificateId);
 
         if (!genCertificate) {
-            return res.status(404).json({ error: 'Generated certificates not found.' });
+            throw new ApiError(404, "Generated certificates not found.");
         }
 
         // Delete certificates from Cloudinary
@@ -321,10 +320,12 @@ export const deleteGeneratedCertificates = async (req, res) => {
         // Delete the GenCertificate document
         await GenCertificate.findByIdAndDelete(generatedCertificateId);
 
-        res.status(200).json({ message: 'Generated certificates deleted successfully.' });
+        res.status(200).json(
+            new ApiResponse(200, null, 'Generated certificates deleted successfully.')
+        );
     } catch (error) {
         console.error('Error deleting generated certificates:', error);
-        res.status(500).json({ error: 'Failed to delete generated certificates.' });
+        throw new ApiError(500, "Failed to delete generated certificates: " + error.message);
     }
 };
 
@@ -354,9 +355,7 @@ export const getUserCertificates = asyncHandler(async (req, res) => {
         );
     } catch (error) {
         console.error("Error in getUserCertificates:", error);
-        return res.status(500).json(
-            new ApiResponse(500, null, "An error occurred while fetching user certificates")
-        );
+        throw new ApiError(500, "An error occurred while fetching user certificates");
     }
 });
 
@@ -366,9 +365,7 @@ export const verifyCertificate = asyncHandler(async (req, res) => {
     const certificate = await GenCertificate.findOne({ 'recipients.verificationCode': verificationCode });
 
     if (!certificate) {
-        return res.status(404).json(
-            new ApiResponse(404, null, "Certificate not found")
-        );
+        throw new ApiError(404, "Certificate not found");
     }
 
     const recipient = certificate.recipients.find(r => r.verificationCode === verificationCode);
