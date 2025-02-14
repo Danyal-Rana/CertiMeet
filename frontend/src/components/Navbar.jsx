@@ -79,7 +79,7 @@ const Navbar = () => {
                                 >
                                     <img
                                         className="h-8 w-8 rounded-full"
-                                        src={user.avatar || 'src/assets/defaultAvatar.png'}
+                                        src={user.avatar || 'https://raw.githubusercontent.com/Danyal-Rana/CertiMeet/main/frontend/src/assets/defaultAvatar.png'}
                                         alt="User Avatar"
                                     />
                                 </button>

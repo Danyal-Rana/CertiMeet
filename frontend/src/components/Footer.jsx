@@ -9,7 +9,7 @@ const Footer = () => {
             <div className="max-w-6xl mx-auto py-4 px-4 sm:px-6 lg:py-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <div>
-                        <img className="h-8" src="src\assets\footerLogo.png" alt="CertiMeet" />
+                        <img className="h-8" src="https://raw.githubusercontent.com/Danyal-Rana/CertiMeet/main/frontend/src/assets/footerLogo.png" alt="CertiMeet" />
                         <p className="mt-4 text-gray-300 text-base">
                             CertiMeet simplifies your workflow by seamlessly combining certificate generation and meeting scheduling into a single, user-friendly platform. Whether you’re organizing events, managing teams, or handling certifications, CertiMeet ensures efficiency and professionalism at every step.
                         </p>
