@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Template</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .certificate-container {
+            width: 70%;
+            margin: auto;
+            padding: 40px;
+            border: 12px solid #8B0000;
+            background: linear-gradient(135deg, #fff, #f9f9fc);
+            border-radius: 20px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .certificate-header {
+            font-size: 36px;
+            font-weight: bold;
+            color: #8B0000;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+
+        .certificate-subheader {
+            font-size: 26px;
+            margin-bottom: 35px;
+            color: #444;
+        }
+
+        .certificate-name {
+            font-size: 30px;
+            font-weight: bold;
+            color: #222;
+            text-transform: uppercase;
+            margin: 20px 0;
+        }
+
+        .certificate-details {
+            font-size: 20px;
+            margin: 12px 0;
+            color: #555;
+        }
+
+        .certificate-footer {
+            font-size: 18px;
+            color: #666;
+            margin-top: 40px;
+            font-style: italic;
+        }
+
+        .certificate-date {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .qr-code {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #8B0000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #8B0000;
+        }
+
+        .qr-code-placeholder {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="certificate-container">
+        <div class="certificate-header">Certificate of Completion</div>
+        <div class="certificate-subheader">This is to certify that</div>
+        <div class="certificate-name">{{name}}</div>
+        <div class="certificate-details">Has successfully completed the course on</div>
+        <div class="certificate-subheader">CSC-336 Web Technologies</div>
+        <div class="certificate-details">Awarded this day</div>
+        <div class="certificate-date">{{issuedDate}}</div>
+        <div class="certificate-footer">
+            Issued by <strong>Mam Saadia Maqbool</strong><br>
+            Signature: @saadia-maqbool
+        </div>
+        <div class="qr-code">
+            <div class="qr-code-placeholder">{{qrCode}}</div>
+        </div>
+    </div>
+</body>
+
+</html>
